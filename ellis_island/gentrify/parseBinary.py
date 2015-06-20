@@ -126,7 +126,11 @@ def document_to_text(filepath):
         except (pdfminer.pdfdocument.PDFTextExtractionNotAllowed,
                 pdfminer.pdfdocument.PSEOF,
                 pdfminer.pdfdocument.PDFEncryptionError):
-            return None
+            try:
+                print 'FARP'
+                auto_textract(filepath)
+            except:
+                return None
     # will handle zips another way
     # elif filepath[-4:].lower() == ".zip":
     #    with TempDir() as dastmpdir:

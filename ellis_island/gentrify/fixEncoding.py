@@ -45,7 +45,8 @@ def sane_unicode_bom(bytes_, errors='replace', returnencoding=False):
                 return unitext
 
 
-def sane_unicode(bytes_, errors='replace', returnencoding=False):
+def sane_unicode(bytes_, encoding='utf-8', errors='replace',
+                 returnencoding=False):
     """
     Convert a byte string into Unicode
     using chardet.
@@ -54,8 +55,7 @@ def sane_unicode(bytes_, errors='replace', returnencoding=False):
         return bytes_
 
     try:
-        unitext = bytes_.decode('utf-8')
-        encoding = 'utf-8'
+        unitext = bytes_.decode(encoding)
     except UnicodeDecodeError:
         detection = chardet.detect(bytes_)
         encoding = detection.get('encoding')
@@ -132,6 +132,8 @@ def make_unicode_n_norm(text, returnencoding=False, asciionly=False):
 
 
 def make_unicode_dang_it(text,
+                         encoding='utf-8',
+                         errors='replace',
                          normize=False,
                          asciionly=False,
                          returnencoding=False):
@@ -148,7 +150,10 @@ def make_unicode_dang_it(text,
         uni = text
     else:
         try:
-            uni, encoding = sane_unicode(text, returnencoding=True)
+            uni, encoding = sane_unicode(text,
+                                         encoding,
+                                         errors,
+                                         returnencoding=True)
         except UnicodeDecodeError:
             uni, encoding = (insane_unicode(text), '')
         if normize:

@@ -44,8 +44,7 @@ def parse_and_log(fname):
 
 
 def main(k,
-         dirroot='/mnt/data1/enron/enron_mail_20110402/textonly/enron/',
-         c=0):
+         dirroot='/mnt/data1/enron/enron_mail_20110402/textonly/enron/', c=0):
     stach.psql_create_table()
     emaillist = [e for e in
                  dirs.spelunker_gen(dirroot)]

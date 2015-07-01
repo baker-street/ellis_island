@@ -5,6 +5,8 @@ Functions to assist in parallel processing with Python 2.7.
 * Easy use of n_jobs. (e.g. when n_jobs == 1, processing is serial)
 * Similar to joblib.Parallel but with the addition of imap functionality
   and a more effective way of handling Ctrl-C exit (we add a timeout).
+
+From: https://github.com/columbia-applied-data-science/rosetta.git
 """
 import itertools
 from multiprocessing import cpu_count, Pool, Process, Manager, Lock
@@ -393,4 +395,3 @@ IMapIterator.next = _imap_wrap(IMapIterator.next)
 if __name__ == '__main__':
     # Can't get doctest to work with multiprocessing...
     pass
-

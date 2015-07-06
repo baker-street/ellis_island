@@ -17,6 +17,7 @@ from chevy.utils import dir_spelunker as dirs
 
 # from gentrify.parseEmail import email_whole_parse
 from ellis_island import parallel_easy as para
+from ellis_island import threading_easy as thre
 # from ellis_island.utils import Serial
 # from gentrify.parse import parse_multi_layer_file
 # from gentrify.parse import OKEXT
@@ -26,6 +27,11 @@ from ellis_island.prepforstash import s3_and_psql_prep
 
 from ellis_island import stach
 CASE = unicode(uuid4())
+
+import logging
+LOG = logging.getLogger(__name__)
+
+ERRORCOUNT = 0
 
 
 def parse_and_log(fname):
@@ -43,8 +49,46 @@ def parse_and_log(fname):
         return None
 
 
+def stash_it(respack):
+    errorcount = 0
+    i, res = respack
+    if res is None:
+        LOG.error('ERROR!!!!!!!!11')
+        errorcount += 1
+    else:
+        for n, doc in enumerate(res):
+            stach.psql_write_to(doc['psql'])
+            docid = doc['psql']['uuid']
+            # print doc['psql']
+            ext = ''.join(['-',
+                           doc['psql']['org_filename'].split('.')[-1],
+                           '.json',
+                           ])
+            newfname = '/mnt/data1/Case2/parsed/' + docid + ext
+            if doc['psql']['use']:
+                with open(newfname, 'w+') as dasfobj:
+                    dasfobj.write(doc['s3text']['content'])
+            LOG.info(''.join(['\t', str(i),
+                              '\t', str(n),
+                              '\t', str(doc['psql']['org_filename']),
+                              ]))
+            # for key, value in doc['psql'].iteritems():
+            #     LOG.info(''.join(['\t\t', str(key),
+            #                       '\t', str(value),
+            #                       ]))
+            # print '\n'
+            # print '---------'
+
+    if errorcount:
+        LOG.error(''.join(['\n',
+                           str(errorcount),
+                           '\t:ERRORCount',
+                           ]))
+    # return errorcount
+
+
 def main(k,
-         dirroot='/mnt/data1/enron/enron_mail_20110402/textonly/enron/', c=0):
+         dirroot='/mnt/data1/enron/enron_mail_20110402/textonly/enron/', c=3):
     stach.psql_create_table()
     emaillist = [e for e in
                  dirs.spelunker_gen(dirroot)]
@@ -54,10 +98,10 @@ def main(k,
     # emlsmpl = [emaillist[random.randint(0, len(emaillist) - 1)]
     #            for i in xrange(k)]
     emlsmpl = emaillist[0:k]
-    errorcount = 0
+    # errorcount = 0
 
     batchsize = 50
-    maxvcores = 7
+    maxvcores = c
     vcores = len(emlsmpl) / batchsize
     if vcores > maxvcores:
         vcores = maxvcores
@@ -67,47 +111,31 @@ def main(k,
                                 vcores,
                                 batchsize,
                                 False)
-    print 'VCores:\t', vcores
-    print 'BatchSize:\t', batchsize
-    for i, res in enumerate(resultiter):
-        if res is None:
-            print 'ERROR!!!!!!!!11'
-            errorcount += 1
-        else:
-            for n, doc in enumerate(res):
-                stach.psql_write_to(doc['psql'])
-                docid = doc['psql']['uuid']
-                print doc['psql']
-                ext = ''.join(['-',
-                               doc['psql']['org_filename'].split('.')[-1],
-                               '.json',
-                               ])
-                newfname = '/mnt/data1/Case2/parsed/' + docid + ext
-                if doc['psql']['use']:
-                    with open(newfname, 'w+') as dasfobj:
-                        dasfobj.write(doc['s3text']['content'])
-                print '\t', i, '\t', n, '\t', doc['psql']['org_filename']
-                for key, value in doc['psql'].iteritems():
-                    print '\t\t', key, '\t', value
-                print '\n'
-                print '---------'
-                print '\t\t\t', len(''.join([it
-                                             for key, value in
-                                             doc['psql'].iteritems()
-                                             for it in
-                                             ('\t\t',
-                                              key,
-                                              '\t',
-                                              unicode(value),
-                                              '\n')]))
+    LOG.info(''.join(['VCores:\t',
+                      str(vcores),
+                      ]))
+    LOG.info(''.join(['BatchSize:\t',
+                      str(batchsize),
+                      ]))
 
-        print '\n', errorcount, '\t:ERRORCount'
-    print '\n' * 2
-    print 'VCores:\t', vcores
-    print 'BatchSize:\t', batchsize
+    respackiter = ((i, res)for i, res in enumerate(resultiter))
+
+    thre.threading_easy(stash_it, respackiter, n_threads=100)
+
+    LOG.info(''.join(['VCores:\t',
+                      str(vcores),
+                      ]))
+    LOG.info(''.join(['BatchSize:\t',
+                      str(batchsize),
+                      ]))
+    #  print '\nerrorcount:\t', errorcount, '\n'
 
 
 if __name__ == '__main__':
+    logging.basicConfig(format='%(levelname)s : %(message)s',
+                        level=logging.INFO)
+    logging.root.level = logging.INFO
+
     try:
         k = int(sys.argv[1])
     except(IndexError):
@@ -115,7 +143,7 @@ if __name__ == '__main__':
     try:
         c = int(sys.argv[2])
     except(IndexError):
-        c = 0
+        c = 3
     try:
         d = sys.argv[3]
     except(IndexError):

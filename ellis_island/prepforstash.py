@@ -8,14 +8,14 @@ __created_on__ = '6/24/2015'
 from json import dumps
 
 
-def s3_and_psql_prep(docdatadict, case):
+def s3_and_psql_prep(docdatadict, case, prefix='s3///'):
     docid = ''.join([docdatadict['uuid'],
                      u'-',
                      docdatadict['metadata']['org_filename'].split('.')[-1],
                      u'.json',
                      ])
-    rawpointer = ''.join(['s3://', case, '/', 'raw', '/', docid])
-    textpointer = ''.join(['s3://', case, '/', 'text', '/', docid])
+    rawpointer = ''.join([prefix, case, '/', 'raw', '/', docid])
+    textpointer = ''.join([prefix, case, '/', 'text', '/', docid])
     newmetadata = docdatadict['metadata'].copy()
     newmetadata.update({'raw_pointer': rawpointer,
                         'text_pointer': textpointer,

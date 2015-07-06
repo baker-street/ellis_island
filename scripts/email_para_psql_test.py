@@ -5,6 +5,7 @@ __author__ = 'Steven Cutting'
 __author_email__ = 'steven.e.cutting@linux.com'
 __created_on__ = '6/29/2015'
 
+import pathlib
 import sys
 # import random
 import os
@@ -26,24 +27,28 @@ from ellis_island.registrar import registrar_nested
 from ellis_island.prepforstash import s3_and_psql_prep
 
 from ellis_island import stach
-CASE = unicode(uuid4())
 
 import logging
 LOG = logging.getLogger(__name__)
 
+CASE = unicode(uuid4())
+CASEABV = CASE.split('-')[0]
 ERRORCOUNT = 0
 
 
 def parse_and_log(fname):
     try:
-        return [s3_and_psql_prep(bit, CASE) for bit in registrar_nested(fname)]
+        return [s3_and_psql_prep(bit,
+                                 case=CASE,
+                                 prefix='/mnt/data1/Case2/parsed/')
+                for bit in registrar_nested(fname)]
         # parseddoc = parse_multi_layer_file(fname)
         # for h in parseddoc:
         #    #y = simple_preprocess(h['content']['body'])
         #    # continue
         # return parseddoc
     except:
-        with open('/home/steven_c/projects/ellis_island/eml_errors.log.' +
+        with open('/home/steven_c/projects/ellis_island/logs/eml_errors.log.' +
                   str(os.getpid()), 'a') as log:
             log.write(fname + '\n')
         return None
@@ -57,16 +62,17 @@ def stash_it(respack):
         errorcount += 1
     else:
         for n, doc in enumerate(res):
-            stach.psql_write_to(doc['psql'])
-            docid = doc['psql']['uuid']
+            stach.psql_write_to(doc['psql'], CASEABV)
+            # docid = doc['psql']['uuid']
             # print doc['psql']
-            ext = ''.join(['-',
-                           doc['psql']['org_filename'].split('.')[-1],
-                           '.json',
-                           ])
-            newfname = '/mnt/data1/Case2/parsed/' + docid + ext
+            # ext = ''.join(['-',
+            #                doc['psql']['org_filename'].split('.')[-1],
+            #                '.json',
+            #                ])
+            # newfname = '/mnt/data1/Case2/parsed/' + docid + ext
+            daspath = doc['s3text']['text_pointer']
             if doc['psql']['use']:
-                with open(newfname, 'w+') as dasfobj:
+                with open(daspath, 'w+') as dasfobj:
                     dasfobj.write(doc['s3text']['content'])
             LOG.info(''.join(['\t', str(i),
                               '\t', str(n),
@@ -89,9 +95,8 @@ def stash_it(respack):
 
 def main(k,
          dirroot='/mnt/data1/enron/enron_mail_20110402/textonly/enron/', c=3):
-    stach.psql_create_table()
-    emaillist = [e for e in
-                 dirs.spelunker_gen(dirroot)]
+    stach.psql_create_table(case=CASEABV)
+    emaillist = list(dirs.spelunker_gen(dirroot))
     print len(emaillist)
     if not k:
         k = len(emaillist)
@@ -117,7 +122,9 @@ def main(k,
     LOG.info(''.join(['BatchSize:\t',
                       str(batchsize),
                       ]))
-
+    outroot = pathlib.Path('/mnt/data1/Case2/parsed/' + CASE + '/text/')
+    if not outroot.is_dir():
+        outroot.mkdir(parents=True)
     respackiter = ((i, res)for i, res in enumerate(resultiter))
 
     thre.threading_easy(stash_it, respackiter, n_threads=100)

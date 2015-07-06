@@ -7,13 +7,18 @@ __created_on__ = '6/29/2015'
 import psycopg2
 
 
-def psql_create_table():
+def psql_create_table(case=''):
     with psycopg2.connect("dbname='docmeta' user='tester' host='localhost'\
                           password='test12' port='2345'") as conn:
         curs = conn.cursor()
         # curs.execute('DROP TABLE IF EXISTS docmeta')
+        table = 'docmeta'
+        if case:
+            tablename = table + case
+        else:
+            tablename = table
         curs.execute("""CREATE TABLE IF NOT EXISTS
-                        docmeta(uuid TEXT PRIMARY KEY,
+                        {table}(uuid TEXT PRIMARY KEY,
                                 type TEXT,
                                 mime TEXT,
                                 info TEXT,
@@ -23,14 +28,19 @@ def psql_create_table():
                                 raw_pointer TEXT,
                                 text_pointer TEXT,
                                 org_filename TEXT)
-                     """)
+                     """.format(table=tablename))
 
 
-def psql_write_to(load):
+def psql_write_to(load, case=''):
     with psycopg2.connect("dbname='docmeta' user='postgres' host='localhost'\
                           password='test12' port='2345'") as conn:
+        table = 'docmeta'
+        if case:
+            tablename = table + case
+        else:
+            tablename = table
         curs = conn.cursor()
-        curs.execute('''INSERT INTO docmeta(uuid,
+        curs.execute('''INSERT INTO {table}(uuid,
                                             type,
                                             mime,
                                             info,
@@ -49,6 +59,6 @@ def psql_write_to(load):
                             %(use)s,
                             %(raw_pointer)s,
                             %(text_pointer)s,
-                            %(org_filename)s)''',
+                            %(org_filename)s)'''.format(table=tablename),
                      load,
                      )

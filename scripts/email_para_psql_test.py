@@ -7,7 +7,7 @@ __created_on__ = '6/29/2015'
 
 import pathlib
 import sys
-# import random
+import random
 import os
 from uuid import uuid4
 
@@ -31,6 +31,9 @@ from ellis_island import stach
 import logging
 LOG = logging.getLogger(__name__)
 
+LOGFMT = '%(levelname)s\tproc:%(process)d thread:%(thread)d module:%(module)s\
+\t%(message)s'
+
 CASE = unicode(uuid4())
 CASEABV = CASE.split('-')[0]
 ERRORCOUNT = 0
@@ -48,6 +51,7 @@ def parse_and_log(fname):
         #    # continue
         # return parseddoc
     except:
+        LOG.critical(fname)
         with open('/home/steven_c/projects/ellis_island/logs/eml_errors.log.' +
                   str(os.getpid()), 'a') as log:
             log.write(fname + '\n')
@@ -86,23 +90,21 @@ def stash_it(respack):
             # print '---------'
 
     if errorcount:
-        LOG.error(''.join(['\n',
-                           str(errorcount),
-                           '\t:ERRORCount',
-                           ]))
-    # return errorcount
+        LOG.info(''.join([str(errorcount),
+                          '\t:ERRORCount',
+                          ]))
 
 
 def main(k,
          dirroot='/mnt/data1/enron/enron_mail_20110402/textonly/enron/', c=3):
     stach.psql_create_table(case=CASEABV)
     emaillist = list(dirs.spelunker_gen(dirroot))
-    print len(emaillist)
+    LOG.info(len(emaillist))
     if not k:
         k = len(emaillist)
-    # emlsmpl = [emaillist[random.randint(0, len(emaillist) - 1)]
-    #            for i in xrange(k)]
-    emlsmpl = emaillist[0:k]
+    emlsmpl = [emaillist[random.randint(0, len(emaillist) - 1)]
+               for i in xrange(k)]
+    # emlsmpl = emaillist[0:k]
     # errorcount = 0
 
     batchsize = 50
@@ -126,8 +128,11 @@ def main(k,
     if not outroot.is_dir():
         outroot.mkdir(parents=True)
     respackiter = ((i, res)for i, res in enumerate(resultiter))
-
-    thre.threading_easy(stash_it, respackiter, n_threads=100)
+    with open(os.devnull, 'w') as null:
+        thre.threading_easy(stash_it,
+                            respackiter,
+                            n_threads=100,
+                            out_stream=null)
 
     LOG.info(''.join(['VCores:\t',
                       str(vcores),
@@ -135,13 +140,14 @@ def main(k,
     LOG.info(''.join(['BatchSize:\t',
                       str(batchsize),
                       ]))
-    #  print '\nerrorcount:\t', errorcount, '\n'
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format='%(levelname)s : %(message)s',
-                        level=logging.INFO)
-    logging.root.level = logging.INFO
+    logging.basicConfig(format=LOGFMT,
+                        level=logging.DEBUG,
+                        stream=sys.stdout)
+    logging.root.level = logging.DEBUG
+    logging.basicConfig
 
     try:
         k = int(sys.argv[1])

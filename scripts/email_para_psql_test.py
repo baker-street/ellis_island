@@ -7,7 +7,7 @@ __created_on__ = '6/29/2015'
 
 import pathlib
 import sys
-import random
+# import random
 import os
 from uuid import uuid4
 
@@ -52,28 +52,14 @@ def parse_and_log(fname):
         # return parseddoc
     except:
         LOG.critical(fname)
-        with open('/home/steven_c/projects/ellis_island/logs/eml_errors.log.' +
-                  str(os.getpid()), 'a') as log:
-            log.write(fname + '\n')
         return None
 
 
 def stash_it(respack):
-    errorcount = 0
     i, res = respack
-    if res is None:
-        LOG.error('ERROR!!!!!!!!11')
-        errorcount += 1
     else:
         for n, doc in enumerate(res):
             stach.psql_write_to(doc['psql'], CASEABV)
-            # docid = doc['psql']['uuid']
-            # print doc['psql']
-            # ext = ''.join(['-',
-            #                doc['psql']['org_filename'].split('.')[-1],
-            #                '.json',
-            #                ])
-            # newfname = '/mnt/data1/Case2/parsed/' + docid + ext
             daspath = doc['s3text']['text_pointer']
             if doc['psql']['use']:
                 with open(daspath, 'w+') as dasfobj:
@@ -82,17 +68,6 @@ def stash_it(respack):
                               '\t', str(n),
                               '\t', str(doc['psql']['org_filename']),
                               ]))
-            # for key, value in doc['psql'].iteritems():
-            #     LOG.info(''.join(['\t\t', str(key),
-            #                       '\t', str(value),
-            #                       ]))
-            # print '\n'
-            # print '---------'
-
-    if errorcount:
-        LOG.info(''.join([str(errorcount),
-                          '\t:ERRORCount',
-                          ]))
 
 
 def main(k,
@@ -102,10 +77,9 @@ def main(k,
     LOG.info(len(emaillist))
     if not k:
         k = len(emaillist)
-    emlsmpl = [emaillist[random.randint(0, len(emaillist) - 1)]
-               for i in xrange(k)]
-    # emlsmpl = emaillist[0:k]
-    # errorcount = 0
+    # emlsmpl = [emaillist[random.randint(0, len(emaillist) - 1)]
+    #            for i in xrange(k)]
+    emlsmpl = emaillist[0:k]
 
     batchsize = 50
     maxvcores = c
@@ -133,7 +107,6 @@ def main(k,
                             respackiter,
                             n_threads=100,
                             out_stream=null)
-
     LOG.info(''.join(['VCores:\t',
                       str(vcores),
                       ]))

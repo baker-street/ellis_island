@@ -8,7 +8,7 @@ __created_on__ = '6/24/2015'
 from json import dumps
 
 
-def s3_and_psql_prep(docdatadict, case, prefix='s3///'):
+def s3_and_psql_prep(docdatadict, case, prefix='s3://'):
     docid = ''.join([docdatadict['uuid'],
                      u'-',
                      docdatadict['metadata']['org_filename'].split('.')[-1],

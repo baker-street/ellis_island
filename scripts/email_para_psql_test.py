@@ -57,7 +57,7 @@ def parse_and_log(fname):
 
 def stash_it(respack):
     i, res = respack
-    else:
+    if res:
         for n, doc in enumerate(res):
             stach.psql_write_to(doc['psql'], CASEABV)
             daspath = doc['s3text']['text_pointer']

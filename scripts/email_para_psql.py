@@ -8,8 +8,11 @@ __created_on__ = '6/29/2015'
 import pathlib
 import sys
 # import random
-import os
+# import os
+import functools
 from uuid import uuid4
+
+import dataset
 
 # import psycopg2
 # from psycopg2 import connect
@@ -18,7 +21,7 @@ from chevy.utils import dir_spelunker as dirs
 
 # from gentrify.parseEmail import email_whole_parse
 from ellis_island import parallel_easy as para
-from ellis_island import threading_easy as thre
+# from ellis_island import threading_easy as thre
 # from ellis_island.utils import Serial
 # from gentrify.parse import parse_multi_layer_file
 # from gentrify.parse import OKEXT
@@ -38,35 +41,36 @@ CASE = unicode(uuid4())
 CASEABV = CASE.split('-')[0]
 ERRORCOUNT = 0
 
+TABLE = 'docmeta'
+if CASEABV:
+    TABLENAME = TABLE + CASEABV
+else:
+    TABLENAME = TABLE
 
-def parse_and_log(fname):
+
+def parse_and_log(fname, prefix):
     try:
         return [s3_and_psql_prep(bit,
                                  case=CASE,
-                                 prefix='/mnt/data1/Case2/parsed/')
+                                 prefix=prefix)
                 for bit in registrar_nested(fname)]
-        # parseddoc = parse_multi_layer_file(fname)
-        # for h in parseddoc:
-        #    #y = simple_preprocess(h['content']['body'])
-        #    # continue
-        # return parseddoc
     except:
         LOG.critical(fname)
         return None
 
 
-def stash_it(respack):
+def stash_it(respack, dsdbobj):
     i, res = respack
     if res:
         for n, doc in enumerate(res):
-            stach.psql_write_to(doc['psql'], CASEABV)
-            daspath = doc['s3text']['text_pointer']
-            if doc['psql']['use']:
+            dsdbobj[TABLENAME].insert(doc['meta'])
+            daspath = doc['text']['pointer']
+            if doc['meta']['use']:
                 with open(daspath, 'w+') as dasfobj:
-                    dasfobj.write(doc['s3text']['content'])
+                    dasfobj.write(doc['text']['content'])
             LOG.info(''.join(['\t', str(i),
                               '\t', str(n),
-                              '\t', str(doc['psql']['org_filename']),
+                              '\t', str(doc['meta']['org_filename']),
                               ]))
 
 
@@ -77,8 +81,6 @@ def main(k,
     LOG.info(len(emaillist))
     if not k:
         k = len(emaillist)
-    # emlsmpl = [emaillist[random.randint(0, len(emaillist) - 1)]
-    #            for i in xrange(k)]
     emlsmpl = emaillist[0:k]
 
     batchsize = 50
@@ -86,8 +88,9 @@ def main(k,
     vcores = len(emlsmpl) / batchsize
     if vcores > maxvcores:
         vcores = maxvcores
-
-    resultiter = para.imap_easy(parse_and_log,
+    p_and_l = functools.partial(parse_and_log,
+                                prefix='/mnt/data1/Case2/parsed/')
+    resultiter = para.imap_easy(p_and_l,
                                 emlsmpl,
                                 vcores,
                                 batchsize,
@@ -102,16 +105,25 @@ def main(k,
     if not outroot.is_dir():
         outroot.mkdir(parents=True)
     respackiter = ((i, res)for i, res in enumerate(resultiter))
-    with open(os.devnull, 'w') as null:
-        thre.threading_easy(stash_it,
-                            respackiter,
-                            n_threads=100,
-                            out_stream=null)
+    # with open(os.devnull, 'w') as null:
+    #     thre.threading_easy(stash_it,
+    #                         respackiter,
+    #                         n_threads=100,
+    #                         out_stream=null)
+    with dataset.connect('postgresql://tester:test12@localhost:2345/docmeta'
+                         ) as tx:
+        s_it = functools.partial(stash_it, dsdbobj=tx)
+        for I, rpack in enumerate(respackiter):
+            s_it(rpack)
+
     LOG.info(''.join(['VCores:\t',
                       str(vcores),
                       ]))
     LOG.info(''.join(['BatchSize:\t',
                       str(batchsize),
+                      ]))
+    LOG.info(''.join(['PacksIterd:\t',
+                      str(I),
                       ]))
 
 

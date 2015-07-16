@@ -5,6 +5,7 @@ __author_email__ = 'steven.e.cutting@linux.com'
 __created_on__ = '6/29/2015'
 
 import psycopg2
+import dataset
 
 
 def psql_create_table(case=''):

@@ -9,24 +9,35 @@ from json import dumps
 
 
 def s3_and_psql_prep(docdatadict, case, prefix='s3://'):
-    docid = ''.join([docdatadict['uuid'],
-                     u'-',
-                     docdatadict['metadata']['org_filename'].split('.')[-1],
-                     u'.json',
-                     ])
-    rawpointer = ''.join([prefix, case, '/', 'raw', '/', docid])
-    textpointer = ''.join([prefix, case, '/', 'text', '/', docid])
+    docuuid = docdatadict['uuid']
+    docext = docdatadict['metadata']['org_filename'].split('.')[-1]
+    # docid = ''.join([docdatadict['uuid'],
+    #                  u'-',
+    #                  docdatadict['metadata']['org_filename'].split('.')[-1],
+    #                  u'.json',
+    #                  ])
+    rawfname = ''.join([docuuid,
+                        u'.',
+                        docext,
+                        ])
+    textname = ''.join([docuuid,
+                        u'-',
+                        docext,
+                        '.json',
+                        ])
+    rawpointer = ''.join([prefix, case, '/', 'raw', '/', rawfname])
+    textpointer = ''.join([prefix, case, '/', 'text', '/', textname])
     newmetadata = docdatadict['metadata'].copy()
     newmetadata.update({'raw_pointer': rawpointer,
                         'text_pointer': textpointer,
                         })
-    return {'uuid': docid,
-            's3raw': {'raw_pointer': rawpointer,
-                      'content': docdatadict['parsed_doc']['rawbody'],
-                      },
-            's3text': {'text_pointer': textpointer,
-                       'content': dumps(docdatadict['parsed_doc']['content'],
-                                        indent=4),
-                       },
-            'psql': newmetadata,
+    return {'uuid': docuuid,
+            'raw': {'pointer': rawpointer,
+                    'content': docdatadict['parsed_doc']['rawbody'],
+                    },
+            'text': {'pointer': textpointer,
+                     'content': dumps(docdatadict['parsed_doc']['content'],
+                                      indent=4),
+                     },
+            'meta': newmetadata,
             }

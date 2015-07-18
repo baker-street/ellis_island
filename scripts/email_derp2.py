@@ -55,6 +55,7 @@ else:
 
 def main(k,
          dirroot='/mnt/data1/enron/enron_mail_20110402/textonly/enron/', c=3):
+    LOG.info('Case:\t' + CASEABV + '\t' + CASE)
     # stach.psql_create_table(case=CASEABV)
     emaillist = list(dirs.spelunker_gen(dirroot))
     LOG.info(len(emaillist))
@@ -67,7 +68,7 @@ def main(k,
     # respackiter = packer_bulk(emlsmpl, vcores, batchsize)
     respackiter = fprep.clean_and_register_en_masse(emlsmpl,
                                                     '/mnt/data1/Case2/parsed/',
-                                                    dontstop=True,
+                                                    dontstop=False,
                                                     njobs=vcores,
                                                     batchsize=batchsize,
                                                     ordered=False)
@@ -80,9 +81,9 @@ def main(k,
     if not outrootraw.is_dir():
         outrootraw.mkdir(parents=True)
     outrootraw = str(outrootraw)
-    # dbcon = 'postgresql://tester:test12@localhost:2345/docmeta'
-    dbcon = ''.join(['sqlite:////mnt/data1/Case2/parsed/',
-                     CASE, '/db', CASEABV, '.db'])
+    dbcon = 'postgresql://tester:test12@localhost:2345/docmeta'
+    # dbcon = ''.join(['sqlite:////mnt/data1/Case2/parsed/',
+    #                  CASE, '/db', CASEABV, '.db'])
     tblname = 'metadata' + CASEABV
     stashenmasse.stash_en_masse(respackiter, metauri=dbcon,
                                 rawuri=outrootraw,

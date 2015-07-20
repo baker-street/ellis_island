@@ -19,7 +19,12 @@ LOG = logging.getLogger(__name__)
 
 class LocalFileStash(object):  # Add support for tar archives.
     """
+    Used for streaming multiple files to the local file system.
+
     parenturi - is the directory where the files will be stored.
+
+    The close method has no effect, it's only for creating a consistent API
+        with all of the Stash context managers.
     """
     def __init__(self, parenturi, encrypt=False,
                  encryptkey=getenv('DAS_ENCRYPT_KEY', get_default_data_key())):

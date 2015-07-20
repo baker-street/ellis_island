@@ -125,7 +125,6 @@ class TempDir(object):
     def __init__(self, dirname=None):
         if dirname:
             self.dirname = dirname
-            print 'derp'
         else:
             self.dirname = tempfile.mkdtemp()
 

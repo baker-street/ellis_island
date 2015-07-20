@@ -3,3 +3,4 @@
 *.sql
 *.sqlite
 *.swp
+*__pycache__*

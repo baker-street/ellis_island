@@ -7,35 +7,18 @@ __created_on__ = '6/29/2015'
 
 import pathlib
 import sys
-# import random
 import os
-# import functools
 from uuid import uuid4
-
-# import dataset
 
 CASE = unicode(uuid4())
 os.environ['CURRENT_CASE_UUID'] = CASE
 CASEABV = CASE.split('-')[0]
 
-# import psycopg2
-# from psycopg2 import connect
-# from gensim.utils import simple_preprocess
+
 from chevy.utils import dir_spelunker as dirs
-
-# from gentrify.parseEmail import email_whole_parse
-# from ellis_island import parallel_easy as para
-# from ellis_island import threading_easy as thre
-# from ellis_island.utils import Serial
-# from gentrify.parse import parse_multi_layer_file
-# from gentrify.parse import OKEXT
-
-# from ellis_island.registrar import registrar_nested
-# from ellis_island.prepforstash import s3_and_psql_prep
 from ellis_island import fullprep as fprep
 from ellis_island import stashenmasse
-
-# from ellis_island import stach
+from ellis_island import stashtodatabase
 
 import logging
 LOG = logging.getLogger(__name__)
@@ -65,7 +48,7 @@ def main(k,
 
     batchsize = 50
     vcores = c
-    # respackiter = packer_bulk(emlsmpl, vcores, batchsize)
+
     respackiter = fprep.clean_and_register_en_masse(emlsmpl,
                                                     '/mnt/data1/Case2/parsed/',
                                                     dontstop=False,
@@ -82,9 +65,9 @@ def main(k,
         outrootraw.mkdir(parents=True)
     outrootraw = str(outrootraw)
     dbcon = 'postgresql://tester:test12@localhost:2345/docmeta'
-    # dbcon = ''.join(['sqlite:////mnt/data1/Case2/parsed/',
-    #                  CASE, '/db', CASEABV, '.db'])
+
     tblname = 'metadata' + CASEABV
+    stashtodatabase.default_create_table_sqlalchemy(dbcon, tablename=tblname)
     stashenmasse.stash_en_masse(respackiter, metauri=dbcon,
                                 rawuri=outrootraw,
                                 texturi=outroottext,

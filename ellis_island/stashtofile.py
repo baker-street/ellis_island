@@ -59,6 +59,7 @@ class S3FileStash(object):
         pass
 
 
+# change to a function that returns the objects it's trying to wrap.
 class FileStash(object):
     """
     parenturi - is the directory where the files will be stored.

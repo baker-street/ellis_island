@@ -6,16 +6,13 @@ __created_on__ = '6/24/2015'
 
 
 from json import dumps
+from hashlib import md5
 
 
-def s3_and_psql_prep(docdatadict, case, prefix='s3://'):
-    docuuid = docdatadict['uuid']
-    docext = docdatadict['metadata']['org_filename'].split('.')[-1]
-    # docid = ''.join([docdatadict['uuid'],
-    #                  u'-',
-    #                  docdatadict['metadata']['org_filename'].split('.')[-1],
-    #                  u'.json',
-    #                  ])
+# TODO (steven_c) Consider moving encryption option here
+def prep_for_stash(docdict, project='project', prefix=''):
+    docuuid = docdict['uuid']
+    docext = docdict['metadata']['org_filename'].split('.')[-1]
     rawfname = ''.join([docuuid,
                         u'.',
                         docext,
@@ -25,19 +22,33 @@ def s3_and_psql_prep(docdatadict, case, prefix='s3://'):
                         docext,
                         '.json',
                         ])
-    rawpointer = ''.join([prefix, case, '/', 'raw', '/', rawfname])
-    textpointer = ''.join([prefix, case, '/', 'text', '/', textname])
-    newmetadata = docdatadict['metadata'].copy()
+    rawpointer = ''.join([prefix, project, '/', 'raw', '/', rawfname])
+    textpointer = ''.join([prefix, project, '/', 'text', '/', textname])
+    textserializedcontent = dumps(docdict['parsed_doc']['content'],
+                                  indent=4)
+    rawcontent = docdict['parsed_doc']['rawbody']
+    newmetadata = docdict['metadata'].copy()
     newmetadata.update({'raw_pointer': rawpointer,
                         'text_pointer': textpointer,
+                        'text_checksum': md5(textserializedcontent).hexdigest(),
+                        'raw_checksum': md5(rawcontent).hexdigest(),
                         })
     return {'uuid': docuuid,
             'raw': {'pointer': rawpointer,
-                    'content': docdatadict['parsed_doc']['rawbody'],
+                    'content': rawcontent,
                     },
             'text': {'pointer': textpointer,
-                     'content': dumps(docdatadict['parsed_doc']['content'],
-                                      indent=4),
+                     'content': textserializedcontent,
                      },
             'meta': newmetadata,
             }
+
+
+def prep_many_for_stash(docdictiterable, project='project', prefix=''):
+    for docdict in docdictiterable:
+        yield prep_for_stash(docdict=docdict, project=project, prefix=prefix)
+
+
+def prep_many_for_stash_list(docdictiterable, project='project', prefix=''):
+    return [prep_for_stash(docdict=docdict, project=project, prefix=prefix)
+            for docdict in docdictiterable]

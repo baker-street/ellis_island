@@ -54,7 +54,8 @@ def main(k,
                                                     dontstop=False,
                                                     njobs=vcores,
                                                     batchsize=batchsize,
-                                                    ordered=False)
+                                                    ordered=False,
+                                                    project=CASE)
 
     outroottext = pathlib.Path('/mnt/data1/Case2/parsed/' + CASE + '/text/')
     if not outroottext.is_dir():

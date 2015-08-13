@@ -9,7 +9,8 @@ from os import getenv
 import dataset
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import(Column, Integer, String, Text, Boolean)
+from sqlalchemy import(Column, Integer, String, Text, Boolean, DateTime, Date)
+from sqlalchemy.dialects.postgres import JSON
 from sqlalchemy.exc import NoSuchTableError
 
 from ellis_island.utils.misc import get_default_data_key
@@ -32,6 +33,12 @@ def default_create_table_sqlalchemy(uri, tablename='metatable'):
         raw_pointer = Column(Text)
         text_pointer = Column(Text)
         org_filename = Column(Text)
+        datetime = Column(DateTime)
+        date_added = Column(Date, nullable=False)
+        if 'psql' in uri or 'postgresql' in uri:
+            children = Column(JSON)
+        else:
+            children = Column(Text)
 
     Base.metadata.create_all(engine)
 

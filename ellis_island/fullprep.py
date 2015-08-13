@@ -6,6 +6,7 @@ __created_on__ = '7/8/2015'
 
 # TODO (steven_c) Work on documentation.
 
+import traceback
 from os import getenv
 from multiprocessing import cpu_count
 from functools import partial
@@ -36,12 +37,14 @@ def custom_clean_and_register(uri, proclist, dontstop=False):
     # return chain_procs(uri, newproclist)
     try:
         return chain_procs(uri, newproclist)
-    except Exception as e:
+    except:
+        LOG.critical('\t'.join([uri,
+                                traceback.format_exc().encode('utf-8')
+                                ]))
         if dontstop:
-            LOG.critical('\t'.join([uri, e.message]))
             return [None]
         else:
-            raise e
+            raise
 
 
 def clean_and_register(uri, dontstop=False,

@@ -6,12 +6,18 @@ __created_on__ = '6/24/2015'
 
 from uuid import uuid4
 from collections import Iterable
+from time import strftime
 
 from gentrify.parse import parse_multi_layer_file
 
 
+def gen_uuid_list(n, uuid_func=uuid4):
+    return (unicode(uuid_func()) for _ in xrange(n))
+
+
 def registrar_nested(uri,
                      parentuuid=None,
+                     parentdatetime=None,
                      currentgeneration=0,
                      _parseddoclist=None,
                      parse_func=parse_multi_layer_file):
@@ -19,13 +25,13 @@ def registrar_nested(uri,
     Registers all, even those that won't be used for further processing.
     """
     generation = currentgeneration
-    parentid = parentuuid
     if not isinstance(_parseddoclist, Iterable):
         parseddoclist = parse_func(uri)
     else:
         parseddoclist = _parseddoclist
+    uuidlist = list(gen_uuid_list(len(parseddoclist)))
     for i, parseddoc in enumerate(parseddoclist):
-        docid = unicode(uuid4())
+        docid = uuidlist[i]
         try:
             metadata = {u'type': parseddoc[u'type'],
                         u'mime': parseddoc[u'mime'],
@@ -35,21 +41,35 @@ def registrar_nested(uri,
                         u'org_filename': parseddoc[u'filename'],
                         u'use': bool(parseddoc[u'content'][u'body']),
                         u'uuid': docid,
-                        u'parent': parentid,
+                        u'parent': parentuuid,
                         u'generation': generation,
+                        u'date_added': unicode(strftime("%Y-%m-%d"))
                         }
+            try:
+                metadata['datetime'] = parseddoc[u'content'][u'datetime']
+            except(KeyError):
+                metadata['datetime'] = parentdatetime
         except(TypeError):
-            yield registrar_nested(uri,
-                                   parentid,
-                                   generation,
-                                   parseddoc,
-                                   parse_func)
+            for doc in registrar_nested(uri,
+                                        parentuuid=uuidlist[0],
+                                        parentdatetime=parentdatetime,
+                                        generation=generation,
+                                        parseddoc=parseddoc,
+                                        parse_func=parse_func):
+                yield doc
         if i == 0:
-            # metadata[u'generation'] = generation
-            parentid = docid
+            metadata['children'] = uuidlist[1:]
+            parentuuid = uuidlist[0]
+            try:
+                parentdatetime = parseddoc[u'content'][u'datetime']
+            except(KeyError):
+                parentdatetime = ''
             generation += 1
-        # else:
-        #     # metadata[u'generation'] = generation
+        else:
+            try:
+                metadata['children']
+            except(KeyError):
+                metadata['children'] = []
         parseddoc['content'].pop('rawbody', None)
         yield {u'uuid': docid,
                u'parsed_doc': parseddoc,

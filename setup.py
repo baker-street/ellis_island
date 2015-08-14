@@ -1,3 +1,4 @@
+"""
 from distutils.core import setup
 from Cython.Build import cythonize
 from distutils.extension import Extension
@@ -31,3 +32,4 @@ extensions = [Extension('*', ['ellis_island/registrar.pyx'],
 setup(name="ellis_island",
       ext_modules=cythonize(extensions),
       )
+"""

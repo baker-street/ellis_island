@@ -27,6 +27,10 @@ LOG = logging.getLogger(__name__)
 LOGFMT = '%(levelname)s\tproc:%(process)d thread:%(thread)d module:%(module)s\
 \t%(message)s'
 
+TESTHELP = '''If test mode,the meta table will end with the first four
+characters of the projects name.
+'''
+
 
 @click.command()
 @click.argument('input_dir', default='/mnt/input')
@@ -44,18 +48,23 @@ LOGFMT = '%(levelname)s\tproc:%(process)d thread:%(thread)d module:%(module)s\
               help='The project id to use.')
 @click.option('--metatable', default='metadata',
               help='The table to store the metadata in.')
+@click.option('--test/--no-test', default=False,
+              help=TESTHELP)
 def main(input_dir,
          metadata_uri,
          textdata_uri,
          n,
          c,
          project,
-         metatable):
+         metatable,
+         test):
     count = n  # TODO (steven_c) clean this up
     vcores = c
     dirroot = input_dir
     os.environ['CURRENT_PROJECT_UUID'] = project
-    LOG.info('Project:\t' + project)
+    if test:
+        metatable = metatable + project
+    LOG.info('\t'.join(['Project:', project, 'Table:', metatable]))
 
     emaillist = list(misc.spelunker_gen(dirroot))
     LOG.info(len(emaillist))
@@ -64,14 +73,14 @@ def main(input_dir,
     emlsmpl = emaillist[0:count]
     batchsize = 50
     respackiter = fprep.clean_and_register_en_masse(emlsmpl,
-                                                    '/mnt/data1/Case2/parsed/',
+                                                    textdata_uri,
                                                     dontstop=False,
                                                     njobs=vcores,
                                                     batchsize=batchsize,
                                                     ordered=False,
                                                     project=project)
-    outroottext = textdata_uri + '/text/'
-    outrootraw = textdata_uri + '/raw/'
+    outroottext = textdata_uri + project + '/text/'
+    outrootraw = textdata_uri + project + '/raw/'
     if textdata_uri.startswith('/') or textdata_uri.startswith('file'):
         outroottext = pathlib.Path(outroottext)
         if not outroottext.is_dir():

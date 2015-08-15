@@ -10,7 +10,7 @@ import sys
 import os
 from uuid import uuid4
 
-PROJECT = unicode(uuid4())
+from arrow import now
 
 from ellis_island.utils import misc
 from ellis_island import fullprep as fprep
@@ -23,9 +23,10 @@ import click
 
 import logging
 LOG = logging.getLogger(__name__)
-
 LOGFMT = '%(levelname)s\tproc:%(process)d thread:%(thread)d module:%(module)s\
 \t%(message)s'
+
+PROJECT = unicode(uuid4())
 
 TESTHELP = '''If test mode,the meta table will end with the first four
 characters of the projects name.
@@ -58,6 +59,7 @@ def main(input_dir,
          project,
          metatable,
          test):
+    starttime = now()
     count = n  # TODO (steven_c) clean this up
     vcores = c
     dirroot = input_dir
@@ -98,12 +100,16 @@ def main(input_dir,
                                 rawuri=outrootraw,
                                 texturi=outroottext,
                                 metatable=metatable)
-    LOG.info(''.join(['VCores:\t',
-                      str(vcores),
-                      ]))
-    LOG.info(''.join(['BatchSize:\t',
-                      str(batchsize),
-                      ]))
+    LOG.info('\t'.join(['VCores:',
+                        str(vcores),
+                        ]))
+    LOG.info('\t'.join(['BatchSize:',
+                        str(batchsize),
+                        ]))
+    endtime = now()
+    LOG.info('\t'.join(['RunTime:',
+                        str(endtime - starttime),
+                        ]))
 
 
 if __name__ == '__main__':

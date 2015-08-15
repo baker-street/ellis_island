@@ -11,11 +11,13 @@ PACKAGES = ['ellis_island',
 setup(
     name='ellis_island',
     version='0.1.0',
+    license='MIT',
     description="Makes misc files usable for nlp, en masse.",
     long_description=THE_LONG_DESCRIPTION,
     classifiers=['Topic :: NLP',
                  'Topic :: Text cleaning',
                  'Intended Audience :: Developers',
+                 'Operating System :: GNU Linux',
                  'Development Status :: 3 - Alpha',
                  'Programming Language :: Python :: 2.7',
                  'License :: MIT License',
@@ -23,11 +25,16 @@ setup(
     keywords='nlp encoding text plaintext preprocessing',
     author='Steven Cutting',
     author_email='steven.e.cutting@linux.com',
-    license='MIT',
     packages=PACKAGES,
     # zip_safe=False,
-    install_requires=[
-    ],
+    install_requires=['pathlib',
+                      'pyyaml',
+                      'six',
+                      'sqlalchemy',
+                      'arrow',
+                      'smart_open'  # TODO (steven_c) phase out smart_open
+                      ],
+    scripts=['scripts/docker_script.py']
 )
 """
 from distutils.core import setup

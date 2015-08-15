@@ -7,9 +7,16 @@ __created_on__ = '6/24/2015'
 from uuid import uuid4
 from collections import Iterable
 from datetime.date import today
+from datetime import datetime
 # from time import strftime
+from traceback import format_stack
 
+from arrow import get
 from gentrify.parse import parse_multi_layer_file
+
+
+import logging
+LOG = logging.getLogger(__name__)
 
 
 def gen_uuid_list(n, uuid_func=uuid4):
@@ -48,7 +55,18 @@ def registrar_nested(uri,
                         u'date_added': dateadded
                         }
             try:
-                metadata['datetime'] = parseddoc[u'content'][u'datetime']
+                dt = parseddoc[u'content'][u'datetime']
+                if isinstance(dt, datetime):
+                    metadata['datetime'] = dt
+                else:
+                    try:
+                        metadata['datetime'] = get(dt).datetime
+                    except Exception as e:
+                        metadata['datetime'] = dt
+                        LOG.warning('\t'.join(['Had trouble handling datetime:',
+                                               e.message,
+                                               format_stack,
+                                               ]))
             except(KeyError):
                 metadata['datetime'] = parentdatetime
         except(TypeError):

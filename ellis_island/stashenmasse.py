@@ -53,7 +53,7 @@ def stash_en_masse(dataiter, metauri, rawuri, texturi, metatable,
                       extraencrypt=extraencrypt, encryptkey=encryptkey
                       ) as stashobj:
         for i, datum in enumerate(dataiter):
-            LOG.info(''.join([str(i), datum['meta']['org_filename']]))
+            LOG.info('\t'.join([str(i), datum['meta']['org_filename']]))
             stashobj.stash(datum)
             I = i
-    LOG.info(''.join(['DocsIterd:\t', str(I)]))
+    LOG.info('\t'.join(['DocsIterd:', str(I)]))

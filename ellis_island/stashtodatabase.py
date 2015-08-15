@@ -9,7 +9,14 @@ from os import getenv
 import dataset
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import(Column, Integer, String, Text, Boolean, DateTime, Date)
+from sqlalchemy import(Column,
+                       Integer,
+                       String,
+                       Text,
+                       Boolean,
+                       DateTime,
+                       Date,
+                       BLOB)
 from sqlalchemy.dialects.postgres import JSON
 from sqlalchemy.exc import NoSuchTableError
 
@@ -33,17 +40,23 @@ def default_create_table_sqlalchemy(uri, tablename='metatable'):
         raw_pointer = Column(Text)
         text_pointer = Column(Text)
         org_filename = Column(Text)
-        datetime = Column(DateTime)
-        date_added = Column(Date, nullable=False)
+        if 'sqlite' in uri:
+            datetime = Column(Text)
+            date_added = Column(Text, nullable=False)
+        else:
+            datetime = Column(DateTime)
+            date_added = Column(Date, nullable=False)
         if 'psql' in uri or 'postgresql' in uri:
             children = Column(JSON)
+        elif 'sqlite' in uri:
+            children = Column(BLOB)
         else:
             children = Column(Text)
+        raw_checksum = Column(Text)
+        text_checksum = Column(Text)
 
     Base.metadata.create_all(engine)
 
-
-# def default_create_table(uri, schema):
 
 class SQLStash(object):
     def __init__(self, uri,

@@ -21,7 +21,8 @@ def registrar_nested(uri,
                      parentdatetime=None,
                      currentgeneration=0,
                      _parseddoclist=None,
-                     parse_func=parse_multi_layer_file):
+                     parse_func=parse_multi_layer_file,
+                     dateadded=today()):
     """
     Registers all, even those that won't be used for further processing.
     """
@@ -44,7 +45,7 @@ def registrar_nested(uri,
                         u'uuid': docid,
                         u'parent': parentuuid,
                         u'generation': generation,
-                        u'date_added': today()
+                        u'date_added': dateadded
                         }
             try:
                 metadata['datetime'] = parseddoc[u'content'][u'datetime']
@@ -56,7 +57,8 @@ def registrar_nested(uri,
                                         parentdatetime=parentdatetime,
                                         generation=generation,
                                         parseddoc=parseddoc,
-                                        parse_func=parse_func):
+                                        parse_func=parse_func,
+                                        dateadded=dateadded):
                 yield doc
         if i == 0:
             metadata['children'] = uuidlist[1:]

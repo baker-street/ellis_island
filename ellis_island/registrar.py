@@ -6,7 +6,8 @@ __created_on__ = '6/24/2015'
 
 from uuid import uuid4
 from collections import Iterable
-from time import strftime
+from datetime.date import today
+# from time import strftime
 
 from gentrify.parse import parse_multi_layer_file
 
@@ -43,7 +44,7 @@ def registrar_nested(uri,
                         u'uuid': docid,
                         u'parent': parentuuid,
                         u'generation': generation,
-                        u'date_added': unicode(strftime("%Y-%m-%d"))
+                        u'date_added': today()
                         }
             try:
                 metadata['datetime'] = parseddoc[u'content'][u'datetime']

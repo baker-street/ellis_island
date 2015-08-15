@@ -4,9 +4,16 @@ __author__ = 'Steven Cutting'
 __author_email__ = 'steven.c.projects@gmail.com'
 __created_on__ = '7/13/2015'
 
+import os
 from os import environ
 
 from cryptography.fernet import Fernet
+
+
+def spelunker_gen(rootdir):
+    for dirname, subdirlist, filelist in os.walk(rootdir):
+        for fname in filelist:
+            yield '{}/{}'.format(dirname, fname)
 
 
 def pass_through(stuff):

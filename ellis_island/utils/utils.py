@@ -55,6 +55,7 @@ def containsAll(str_, set_):
     return 4 <= nummatch or nummatch > numinset
 
 
+# TODO (steven_c) refactor out the stupid classes
 class Serial():
     @staticmethod
     def pickle_save(filename_, object_):

@@ -48,10 +48,12 @@ def stash_en_masse(dataiter, metauri, rawuri, texturi, metatable,
                    extraencrypt=False,
                    encryptkey=getenv('DAS_ENCRYPT_KEY',
                                      get_default_data_key())):
+    I = 0
     with EnMasseStash(metauri, rawuri, texturi, metatable=metatable,
                       extraencrypt=extraencrypt, encryptkey=encryptkey
                       ) as stashobj:
         for i, datum in enumerate(dataiter):
             LOG.info(''.join([str(i), datum['meta']['org_filename']]))
             stashobj.stash(datum)
-    LOG.info(''.join(['DocsIterd:\t', str(i)]))
+            I = i
+    LOG.info(''.join(['DocsIterd:\t', str(I)]))

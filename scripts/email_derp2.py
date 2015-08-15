@@ -15,7 +15,7 @@ os.environ['CURRENT_CASE_UUID'] = CASE
 CASEABV = CASE.split('-')[0]
 
 
-from chevy.utils import dir_spelunker as dirs
+from ellis_island.utils import misc
 from ellis_island import fullprep as fprep
 from ellis_island import stashenmasse
 from ellis_island import stashtodatabase
@@ -40,7 +40,7 @@ def main(k,
          dirroot='/mnt/data1/enron/enron_mail_20110402/textonly/enron/', c=3):
     LOG.info('Case:\t' + CASEABV + '\t' + CASE)
     # stach.psql_create_table(case=CASEABV)
-    emaillist = list(dirs.spelunker_gen(dirroot))
+    emaillist = list(misc.spelunker_gen(dirroot))
     LOG.info(len(emaillist))
     if not k:
         k = len(emaillist)

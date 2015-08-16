@@ -22,8 +22,8 @@ def prep_for_stash(docdict, project='project', prefix=''):
                         docext,
                         ])
     textname = ''.join([docuuid,
-                        u'-',
-                        docext,
+                        # u'-',
+                        # docext,  # consider removing for good.
                         '.json',
                         ])
     rawpointer = ''.join([prefix, project, '/', 'raw', '/', rawfname])

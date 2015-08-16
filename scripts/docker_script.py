@@ -5,12 +5,13 @@ __author__ = 'Steven Cutting'
 __author_email__ = 'steven.e.cutting@linux.com'
 __created_on__ = '6/29/2015'
 
-import pathlib
 import sys
 import os
+from os import path
 from os import getenv
 from uuid import uuid4
 
+import pathlib
 from arrow import now
 
 from ellis_island.utils import misc
@@ -18,6 +19,7 @@ from ellis_island import fullprep as fprep
 from ellis_island import stashenmasse
 from ellis_island import stashtodatabase
 from ellis_island.utils.misc import get_default_data_key
+from ellis_island.utils.smartopen import prefix_path_from_uri, ParseUri
 
 # Imports for script portion.
 import click
@@ -36,12 +38,12 @@ characters of the projects name.
 
 
 @click.command()
-@click.argument('input_dir', default='/mnt/input')
+@click.argument('inputdir', default='/mnt/input')
 # help='Directory to pull files from. Full path.')
-@click.argument('metadata_uri',
+@click.argument('metadatauri',
                 default='sqlite:////mnt/output/metadata.db')
 # help='Where to store the captured metadata. A uri.')
-@click.argument('textdata_uri', default='/mnt/output/textdata/')
+@click.argument('textdatauri', default='/mnt/output/textdata/')
 # help='Where to store the processed data. A uri.')
 @click.option('-n', default=0, type=int,
               help='Number of files to use. If 0, it will use all found files.')
@@ -58,9 +60,9 @@ characters of the projects name.
 @click.option('--encryptkey', default=getenv('DAS_ENCRYPT_KEY',
                                              get_default_data_key()),
               help='The encryption key to use')
-def main(input_dir,
-         metadata_uri,
-         textdata_uri,
+def main(inputdir,
+         metadatauri,
+         textdatauri,
          n,
          c,
          project,
@@ -72,42 +74,45 @@ def main(input_dir,
     starttime = now()
     count = n  # TODO (steven_c) clean this up
     vcores = c
-    dirroot = input_dir
     os.environ['CURRENT_PROJECT_UUID'] = project
     if test:
         metatable = metatable + project
     LOG.info('\t'.join(['Project:', project, 'Table:', metatable]))
-
-    emaillist = list(misc.spelunker_gen(dirroot))
+    # --
+    # IO
+    emaillist = list(misc.spelunker_gen(inputdir))
     LOG.info(len(emaillist))
+    # --
+    # Proc
     if not count:
         count = len(emaillist)
     emlsmpl = emaillist[0:count]
     batchsize = 50
+    prefix = prefix_path_from_uri(textdatauri)
     respackiter = fprep.clean_and_register_en_masse(emlsmpl,
-                                                    textdata_uri,
+                                                    prefix=prefix,
                                                     dontstop=False,
                                                     njobs=vcores,
                                                     batchsize=batchsize,
                                                     ordered=False,
                                                     project=project)
-    outroottext = textdata_uri + project + '/text/'
-    outrootraw = textdata_uri + project + '/raw/'
-    if textdata_uri.startswith('/') or textdata_uri.startswith('file'):
-        outroottext = pathlib.Path(outroottext)
-        if not outroottext.is_dir():
-            outroottext.mkdir(parents=True)
-        outroottext = str(outroottext)
-        outrootraw = pathlib.Path(outrootraw)
-        if not outrootraw.is_dir():
-            outrootraw.mkdir(parents=True)
-        outrootraw = str(outrootraw)
+    # --
+    # IO
+    outroottext = path.join(textdatauri, project, 'text/')
+    outrootraw = path.join(textdatauri, project, 'raw/')
+    if ParseUri(textdatauri).scheme in {'file'}:
+        outroottextobj = pathlib.Path(outroottext)
+        if not outroottextobj.is_dir():
+            outroottextobj.mkdir(parents=True)
+        outrootrawobj = pathlib.Path(outrootraw)
+        if not outrootrawobj.is_dir():
+            outrootrawobj.mkdir(parents=True)
     # dbcon = 'postgresql://tester:test12@localhost:2345/docmeta'
 
-    stashtodatabase.default_create_table_sqlalchemy(metadata_uri,
+    stashtodatabase.default_create_table_sqlalchemy(metadatauri,
                                                     tablename=metatable)
     stashenmasse.stash_en_masse(respackiter,
-                                metauri=metadata_uri,
+                                metauri=metadatauri,
                                 rawuri=outrootraw,
                                 texturi=outroottext,
                                 metatable=metatable,

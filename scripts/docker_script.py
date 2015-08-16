@@ -8,6 +8,7 @@ __created_on__ = '6/29/2015'
 import pathlib
 import sys
 import os
+from os import getenv
 from uuid import uuid4
 
 from arrow import now
@@ -16,6 +17,7 @@ from ellis_island.utils import misc
 from ellis_island import fullprep as fprep
 from ellis_island import stashenmasse
 from ellis_island import stashtodatabase
+from ellis_island.utils.misc import get_default_data_key
 
 # Imports for script portion.
 import click
@@ -51,6 +53,11 @@ characters of the projects name.
               help='The table to store the metadata in.')
 @click.option('--test/--no-test', default=False,
               help=TESTHELP)
+@click.option('--encrypt/--no-encrypt', default=False,
+              help="Encrypt the files? (does not include metadata")
+@click.option('--encryptkey', default=getenv('DAS_ENCRYPT_KEY',
+                                             get_default_data_key()),
+              help='The encryption key to use')
 def main(input_dir,
          metadata_uri,
          textdata_uri,
@@ -58,7 +65,10 @@ def main(input_dir,
          c,
          project,
          metatable,
-         test):
+         test,
+         encrypt,
+         encryptkey):
+    encryptkey = encryptkey.strip()
     starttime = now()
     count = n  # TODO (steven_c) clean this up
     vcores = c
@@ -96,10 +106,13 @@ def main(input_dir,
 
     stashtodatabase.default_create_table_sqlalchemy(metadata_uri,
                                                     tablename=metatable)
-    stashenmasse.stash_en_masse(respackiter, metauri=metadata_uri,
+    stashenmasse.stash_en_masse(respackiter,
+                                metauri=metadata_uri,
                                 rawuri=outrootraw,
                                 texturi=outroottext,
-                                metatable=metatable)
+                                metatable=metatable,
+                                extraencrypt=encrypt,
+                                encryptkey=encryptkey)
     LOG.info('\t'.join(['VCores:',
                         str(vcores),
                         ]))

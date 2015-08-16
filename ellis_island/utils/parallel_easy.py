@@ -1,12 +1,24 @@
 """
+Full license in: Rosetta-LICENSE.txt
+=======
+License
+=======
+Rosetta is distributed under a 3-clause ("Simplified" or "New") BSD
+license.
+===========================
+About the Copyright Holders
+===========================
+The core team that coordinates development on GitHub can be found here:
+http://github.com/columbia-applied-data-science/Rosetta
+Full credits for Rosetta contributors can be found in the documentation.
+===============================================================================
+
 Functions to assist in parallel processing with Python 2.7.
 * Memory-friendly iterator functionality (wrapping Pool.imap).
 * Exit with Ctrl-C.
 * Easy use of n_jobs. (e.g. when n_jobs == 1, processing is serial)
 * Similar to joblib.Parallel but with the addition of imap functionality
   and a more effective way of handling Ctrl-C exit (we add a timeout).
-
-From: https://github.com/columbia-applied-data-science/rosetta.git
 """
 import itertools
 from multiprocessing import cpu_count, Pool, Process, Manager, Lock

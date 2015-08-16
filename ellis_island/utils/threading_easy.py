@@ -1,7 +1,19 @@
 """
-Functions to assist in multithreaded processing with Python 2.7.
+Full license in: Rosetta-LICENSE.txt
+=======
+License
+=======
+Rosetta is distributed under a 3-clause ("Simplified" or "New") BSD
+license.
+===========================
+About the Copyright Holders
+===========================
+The core team that coordinates development on GitHub can be found here:
+http://github.com/columbia-applied-data-science/Rosetta
+Full credits for Rosetta contributors can be found in the documentation.
+===============================================================================
 
-From: https://github.com/columbia-applied-data-science/rosetta.git
+Functions to assist in multithreaded processing with Python 2.7.
 """
 import sys
 import threading

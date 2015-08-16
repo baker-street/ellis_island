@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+"""
+ellis_island  Copyright (C) 2015  Steven Cutting - License: ellis_island/LICENSE
+"""
 from setuptools import setup, find_packages
 
 THE_LONG_DESCRIPTION = """
@@ -11,7 +15,7 @@ PACKAGES = ['ellis_island',
 setup(
     name='ellis_island',
     version='0.1.0',
-    license='MIT',
+    license='GNU GPL v3+',
     description="Makes misc files usable for nlp, en masse.",
     long_description=THE_LONG_DESCRIPTION,
     classifiers=['Topic :: NLP',

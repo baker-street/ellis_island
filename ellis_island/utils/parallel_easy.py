@@ -1,5 +1,5 @@
 """
-Full license in: Rosetta-LICENSE.txt
+Full Rosetta license in: Rosetta-LICENSE.txt
 =======
 License
 =======

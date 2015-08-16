@@ -26,6 +26,7 @@ def pass_through(stuff):
 
 
 def encrypt_it(content, key):
+    print key
     ferob = Fernet(str(key))
     return ferob.encrypt(str(content))
 

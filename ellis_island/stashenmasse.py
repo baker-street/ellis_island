@@ -11,7 +11,7 @@ __email__ = 'steven.c.projects@gmail.com'
 
 from os import getenv
 
-from ellis_island.stashtofile import FileStash
+from ellis_island.stashtofile import file_stash
 from ellis_island.stashtodatabase import SQLStash
 from ellis_island.utils.misc import get_default_data_key
 
@@ -23,7 +23,7 @@ class EnMasseStash(object):
     def __init__(self, metauri, rawuri, texturi, metatable='metadata',
                  extraencrypt=False, encryptkey=getenv('DAS_ENCRYPT_KEY',
                                                        get_default_data_key()),
-                 DataStash=FileStash, MetaStash=SQLStash):
+                 DataStash=file_stash, MetaStash=SQLStash):
         self.metawriter = MetaStash(metauri, metatable, encrypt=extraencrypt,
                                     encryptkey=encryptkey)
         self.rawwriter = DataStash(rawuri, encrypt=extraencrypt,

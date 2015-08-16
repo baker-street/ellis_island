@@ -10,10 +10,12 @@ __maintainer__ = "Steven Cutting"
 __email__ = 'steven.c.projects@gmail.com'
 
 from os import getenv
-import functools
+from functools import partial
 
 from pathlib import Path
 from six.moves.urllib.parse import urlsplit
+import boto3
+from botocore.client import Config
 
 from ellis_island.utils.misc import pass_through, encrypt_it
 from ellis_island.utils.misc import get_default_data_key
@@ -23,6 +25,8 @@ import logging
 LOG = logging.getLogger(__name__)
 
 
+# -----------------------------------------------------------------------------
+# Local File System
 class LocalFileStash(object):  # Add support for tar archives.
     """
     Used for streaming multiple files to the local file system.
@@ -40,7 +44,7 @@ class LocalFileStash(object):  # Add support for tar archives.
         if not self.parentpath.is_dir():
             self.parentpath.mkdir(parents=True)
         if encrypt:
-            self.envelope = functools.partial(encrypt_it, key=encryptkey)
+            self.envelope = partial(encrypt_it, key=encryptkey)
         else:
             self.envelope = pass_through
 
@@ -63,15 +67,81 @@ class LocalFileStash(object):  # Add support for tar archives.
         self.close()
 
 
+# -----------------------------------------------------------------------------
+# S3
+def s3_stash_object(bucket, key, body, acl='private', encrypt=True, **xargs):
+    """
+    if encrypt is true (default) then s3 will use server side aes256 encryption,
+    which shouldn't cause a noticeable difference in use of the objects stored.
+    (assuming they are intended to be non-public)
+
+    additional args to checkout:
+        metadata, contentencoding, serversideencryption, ssekmskeyid
+
+    passing 'serversideencryption' and 'ssekmskeyid' will override the default
+    encryption method and use the one specified.
+    """
+    if encrypt:
+        xargs['ServerSideEncryption'] = 'AES256'
+    client = boto3.client('s3', config=Config(signature_version='s3v4'))
+    return client.put_object(ACL=acl,
+                             Bucket=bucket,
+                             Key=key,
+                             Body=body,
+                             **xargs)
+
+
 class S3FileStash(object):
     """
     parenturi - is the bucket (and 'folder')  where the files will be stored.
+
+
+    if encrypt is true (default) then s3 will use server side aes256 encryption,
+    which shouldn't cause a noticeable difference in use of the objects stored.
+    (assuming they are intended to be non-public)
+
+    additional args to checkout:
+        metadata, contentencoding, serversideencryption, ssekmskeyid
+
+    passing 'serversideencryption' and 'ssekmskeyid' will override the default
+    encryption method and use the one specified.
     """
-    def __init__(self, parenturi, encrypt=False,
-                 encryptkey=getenv('DAS_ENCRYPT_KEY', get_default_data_key())):
+    def __init__(self, parenturi, encrypt=False, removeExtIfEncrypt=True,
+                 encryptkey=getenv('DAS_ENCRYPT_KEY', get_default_data_key()),
+                 **otherArgsForS3):
+        self.parentpath = Path(urlsplit(parenturi).path)
+        self.encrypt = encrypt
+        self.removeExtIfEncrypt = removeExtIfEncrypt
+        self.parsedParentUri = ParseUri(parenturi)
+        self.post_it = partial(s3_stash_object,
+                               bucket=str(self.parsedParentUri.bucket_id),
+                               encrypt=encrypt,
+                               **otherArgsForS3)
+
+        if encrypt:
+            self.envelope = partial(encrypt_it, key=encryptkey)
+        else:
+            self.envelope = pass_through
+
+    def stash(self, datumdict):
+        pointer = ParseUri(datumdict['pointer']).key_id.encode('utf-8')
+        if self.encrypt and self.removeExtIfEncrypt:
+            pointer = pointer.split('.')[0]
+        self.post_it(key=pointer,
+                     body=self.envelope(datumdict['content']))
+
+    def close(self):
         pass
 
+    def __enter__(self):
+        return self
 
+    def __exit__(self, type, value, traceback):
+        self.close()
+
+
+# -----------------------------------------------------------------------------
+# All Locations
 def file_stash(parenturi, encrypt=False,
                encryptkey=getenv('DAS_ENCRYPT_KEY', get_default_data_key())):
     """

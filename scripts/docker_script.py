@@ -70,7 +70,10 @@ def main(inputdir,
          test,
          encrypt,
          encryptkey):
-    encryptkey = encryptkey.strip()
+    try:
+        encryptkey = encryptkey.strip()
+    except AttributeError:
+        LOG.debug('No encryptkey was passed passed or found.')
     starttime = now()
     count = n  # TODO (steven_c) clean this up
     vcores = c

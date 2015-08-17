@@ -23,13 +23,14 @@ class EnMasseStash(object):
     def __init__(self, metauri, rawuri, texturi, metatable='metadata',
                  extraencrypt=False, encryptkey=getenv('DAS_ENCRYPT_KEY',
                                                        get_default_data_key()),
-                 DataStash=file_stash, MetaStash=SQLStash):
-        self.metawriter = MetaStash(metauri, metatable, encrypt=extraencrypt,
-                                    encryptkey=encryptkey)
-        self.rawwriter = DataStash(rawuri, encrypt=extraencrypt,
-                                   encryptkey=encryptkey)
-        self.textwriter = DataStash(texturi, encrypt=extraencrypt,
-                                    encryptkey=encryptkey)
+                 StashFiles=file_stash, StashMeta=SQLStash, **xargs):
+        # TODO (steven_c) consider handling the encrypt key through xargs.
+        self.metawriter = StashMeta(metauri, metatable, encrypt=extraencrypt,
+                                    encryptkey=encryptkey, **xargs)
+        self.rawwriter = StashFiles(rawuri, encrypt=extraencrypt,
+                                   encryptkey=encryptkey, **xargs)
+        self.textwriter = StashFiles(texturi, encrypt=extraencrypt,
+                                    encryptkey=encryptkey, **xargs)
 
     def stash(self, datumdict):
         self.metawriter.stash(datumdict['meta'])
@@ -52,11 +53,13 @@ class EnMasseStash(object):
 def stash_en_masse(dataiter, metauri, rawuri, texturi, metatable,
                    extraencrypt=False,
                    encryptkey=getenv('DAS_ENCRYPT_KEY',
-                                     get_default_data_key())):
+                                     get_default_data_key()),
+                   **xargs):
+    # TODO (steven_c) consider handling the encrypt key through xargs.
     I = 0
     with EnMasseStash(metauri, rawuri, texturi, metatable=metatable,
-                      extraencrypt=extraencrypt, encryptkey=encryptkey
-                      ) as stashobj:
+                      extraencrypt=extraencrypt, encryptkey=encryptkey,
+                      **xargs) as stashobj:
         for i, datum in enumerate(dataiter):
             LOG.info('\t'.join([str(i), datum['meta']['org_filename']]))
             stashobj.stash(datum)

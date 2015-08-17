@@ -65,9 +65,9 @@ def default_create_table_sqlalchemy(uri, tablename='metatable'):
 
 class SQLStash(object):
     def __init__(self, uri,
-                 table=getenv('METADATA_TABLE_NAME', 'docmetadata'),
+                 table=getenv('METADATA_TABLE_NAME', 'metadata'),
                  chuncksize=500,
-                 types={'uuid': String(36),
+                 types={'uuid': String(36),  # TODO (steven_c)consider removeing
                         'type': Text,
                         'mime': Text,
                         'info': Text,
@@ -78,8 +78,8 @@ class SQLStash(object):
                         'text_pointer': Text,
                         'org_filename': Text,
                         },
-                 encrypt=False,
                  encryptkey=getenv('DAS_ENCRYPT_KEY', get_default_data_key()),
+                 # TODO (steven_c) consider removeing
                  index=False, indexcolumns=[['uuid', 'type'],
                                             ['uuid', 'generation'],
                                             ['uuid', 'parent'],
@@ -89,7 +89,8 @@ class SQLStash(object):
                                             ['parent'],
                                             ['use'],
                                             ['generation'],
-                                            ]):
+                                            ],
+                 **xargs):
         self.uri = uri
         self.chuncksize = chuncksize
         self.table = table

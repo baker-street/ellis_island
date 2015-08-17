@@ -37,7 +37,8 @@ class LocalFileStash(object):  # Add support for tar archives.
         with all of the Stash context managers.
     """
     def __init__(self, parenturi, encrypt=False, removeExtIfEncrypt=True,
-                 encryptkey=getenv('DAS_ENCRYPT_KEY', get_default_data_key())):
+                 encryptkey=getenv('DAS_ENCRYPT_KEY', get_default_data_key()),
+                 **xargs):
         self.parentpath = Path(urlsplit(parenturi).path)
         self.encrypt = encrypt
         self.removeExtIfEncrypt = removeExtIfEncrypt
@@ -76,19 +77,36 @@ def s3_stash_object(bucket, key, body, acl='private', encrypt=True, **xargs):
     (assuming they are intended to be non-public)
 
     additional args to checkout:
-        metadata, contentencoding, serversideencryption, ssekmskeyid
+        Metadata, ContentEncoding, ServerSideEncryption, SSEKMSKeyId
+    Also:
+        passing:
+            kmsencrypt=True, kmskeyid='a kms key id'
+        is equivalent to:
+            ServerSideEncryption='aws:kms', SSEKMSKeyId='a kms key id'
+
 
     passing 'serversideencryption' and 'ssekmskeyid' will override the default
     encryption method and use the one specified.
     """
-    if encrypt:
-        xargs['ServerSideEncryption'] = 'AES256'
+    s3args = dict()
+    try:
+        s3args['ServerSideEncryption'] = xargs['ServerSideEncryption']
+    except KeyError:
+        if xargs['kmsencrypt']:
+            s3args['ServerSideEncryption'] = 'aws:kms'
+        elif encrypt:
+            s3args['ServerSideEncryption'] = 'AES256'
+    try:
+        s3args['SSEKMSKeyId'] = xargs['SSEKMSKeyId']
+    except KeyError:
+        if xargs['kmsencrypt']:
+            s3args['SSEKMSKeyId'] = xargs['kmskeyid']
     client = boto3.client('s3', config=Config(signature_version='s3v4'))
     return client.put_object(ACL=acl,
                              Bucket=bucket,
                              Key=key,
                              Body=body,
-                             **xargs)
+                             **s3args)
 
 
 class S3FileStash(object):
@@ -143,7 +161,8 @@ class S3FileStash(object):
 # -----------------------------------------------------------------------------
 # All Locations
 def file_stash(parenturi, encrypt=False,
-               encryptkey=getenv('DAS_ENCRYPT_KEY', get_default_data_key())):
+               encryptkey=getenv('DAS_ENCRYPT_KEY', get_default_data_key()),
+               **xargs):
     """
     parenturi - is the directory or bucket (and 'folder')
                 where the files will be stored.
@@ -152,9 +171,11 @@ def file_stash(parenturi, encrypt=False,
     """
     parseduri = ParseUri(parenturi)
     if parseduri.scheme in {'file'}:
-        return LocalFileStash(parenturi, encrypt=encrypt, encryptkey=encryptkey)
+        return LocalFileStash(parenturi, encrypt=encrypt, encryptkey=encryptkey,
+                              **xargs)
     elif parseduri.scheme in {'s3', 's3n'}:
-        return S3FileStash(parenturi, encrypt=encrypt, encryptkey=encryptkey)
+        return S3FileStash(parenturi, encrypt=encrypt, encryptkey=encryptkey,
+                           **xargs)
 
 
 # change to a function that returns the objects it's trying to wrap.

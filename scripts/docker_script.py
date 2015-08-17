@@ -32,8 +32,7 @@ LOGFMT = '%(levelname)s\tproc:%(process)d thread:%(thread)d module:%(module)s\
 
 PROJECT = unicode(uuid4())
 
-TESTHELP = '''If test mode,the meta table will end with the first four
-characters of the projects name.
+TESTHELP = '''If test mode,the meta table will end with the projects name.
 '''
 
 
@@ -60,6 +59,10 @@ characters of the projects name.
 @click.option('--encryptkey', default=getenv('DAS_ENCRYPT_KEY',
                                              get_default_data_key()),
               help='The encryption key to use')
+@click.option('--kmsencrypt/--no-kmsencrypt', default=False,
+              help="Use kms to encrypt files going to s3.")
+@click.option('--kmskeyid', default='',
+              help='The key id of the kms encryption key to use. For s3.')
 def main(inputdir,
          metadatauri,
          textdatauri,
@@ -69,7 +72,9 @@ def main(inputdir,
          metatable,
          test,
          encrypt,
-         encryptkey):
+         encryptkey,
+         kmsencrypt,
+         kmskeyid):
     try:
         encryptkey = encryptkey.strip()
     except AttributeError:
@@ -120,7 +125,9 @@ def main(inputdir,
                                 texturi=outroottext,
                                 metatable=metatable,
                                 extraencrypt=encrypt,
-                                encryptkey=encryptkey)
+                                encryptkey=encryptkey,
+                                kmsencrypt=kmsencrypt,
+                                kmskeyid=kmskeyid)
     LOG.info('\t'.join(['VCores:',
                         str(vcores),
                         ]))

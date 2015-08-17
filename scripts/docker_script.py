@@ -39,11 +39,11 @@ TESTHELP = '''If test mode,the meta table will end with the projects name.
 @click.command()
 @click.argument('inputdir', default='/mnt/input')
 # help='Directory to pull files from. Full path.')
-@click.argument('metadatauri',
-                default='sqlite:////mnt/output/metadata.db')
-# help='Where to store the captured metadata. A uri.')
-@click.argument('textdatauri', default='/mnt/output/textdata/')
-# help='Where to store the processed data. A uri.')
+@click.option('--meta',
+              default='sqlite:////mnt/output/metadata.db',
+              help='Where to store the captured metadata. A uri.')
+@click.option('--datafile', default='/mnt/output/textdata/',
+              help='Where to store the out put data files. A uri.')
 @click.option('-n', default=0, type=int,
               help='Number of files to use. If 0, it will use all found files.')
 @click.option('-c', default=3,
@@ -64,8 +64,8 @@ TESTHELP = '''If test mode,the meta table will end with the projects name.
 @click.option('--kmskeyid', default='',
               help='The key id of the kms encryption key to use. For s3.')
 def main(inputdir,
-         metadatauri,
-         textdatauri,
+         meta,
+         datafile,
          n,
          c,
          project,
@@ -96,7 +96,7 @@ def main(inputdir,
         count = len(emaillist)
     emlsmpl = emaillist[0:count]
     batchsize = 50
-    prefix = prefix_path_from_uri(textdatauri)
+    prefix = prefix_path_from_uri(datafile)
     respackiter = fprep.clean_and_register_en_masse(emlsmpl,
                                                     prefix=prefix,
                                                     dontstop=False,
@@ -106,9 +106,9 @@ def main(inputdir,
                                                     project=project)
     # --
     # IO
-    outroottext = path.join(textdatauri, project, 'text/')
-    outrootraw = path.join(textdatauri, project, 'raw/')
-    if ParseUri(textdatauri).scheme in {'file'}:
+    outroottext = path.join(datafile, project, 'text/')
+    outrootraw = path.join(datafile, project, 'raw/')
+    if ParseUri(datafile).scheme in {'file'}:
         outroottextobj = pathlib.Path(outroottext)
         if not outroottextobj.is_dir():
             outroottextobj.mkdir(parents=True)
@@ -117,10 +117,10 @@ def main(inputdir,
             outrootrawobj.mkdir(parents=True)
     # dbcon = 'postgresql://tester:test12@localhost:2345/docmeta'
 
-    stashtodatabase.default_create_table_sqlalchemy(metadatauri,
+    stashtodatabase.default_create_table_sqlalchemy(meta,
                                                     tablename=metatable)
     stashenmasse.stash_en_masse(respackiter,
-                                metauri=metadatauri,
+                                metauri=meta,
                                 rawuri=outrootraw,
                                 texturi=outroottext,
                                 metatable=metatable,

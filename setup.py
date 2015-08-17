@@ -36,7 +36,8 @@ setup(
                       'six',
                       'sqlalchemy',
                       'arrow',
-                      'smart_open'  # TODO (steven_c) phase out smart_open
+                      'smart_open',  # TODO (steven_c) phase out smart_open
+                      'boto3',
                       ],
     scripts=['scripts/docker_script.py']
 )

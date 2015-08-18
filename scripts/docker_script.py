@@ -63,6 +63,8 @@ TESTHELP = '''If test mode,the meta table will end with the projects name.
               help="Use kms to encrypt files going to s3.")
 @click.option('--kmskeyid', default='',
               help='The key id of the kms encryption key to use. For s3.')
+@click.option('--dontstop/--no-dontstop', default=False,
+              help="Skips docs that raise errors.")
 def main(inputdir,
          meta,
          datafile,
@@ -74,7 +76,8 @@ def main(inputdir,
          encrypt,
          encryptkey,
          kmsencrypt,
-         kmskeyid):
+         kmskeyid,
+         dontstop):
     try:
         encryptkey = encryptkey.strip()
     except AttributeError:
@@ -99,7 +102,7 @@ def main(inputdir,
     prefix = prefix_path_from_uri(datafile)
     respackiter = fprep.clean_and_register_en_masse(emlsmpl,
                                                     prefix=prefix,
-                                                    dontstop=False,
+                                                    dontstop=dontstop,
                                                     njobs=vcores,
                                                     batchsize=batchsize,
                                                     ordered=False,

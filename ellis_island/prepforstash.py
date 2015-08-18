@@ -9,12 +9,17 @@ __license__ = "GPL3"
 __maintainer__ = "Steven Cutting"
 __email__ = 'steven.c.projects@gmail.com'
 
+from os.path import join
 from json import dumps
 from hashlib import md5
+
+import logging
+LOG = logging.getLogger(__name__)
 
 
 # TODO (steven_c) Consider moving encryption option here
 def prep_for_stash(docdict, project='project', prefix=''):
+    LOG.debug('doc prefix:\t' + prefix)
     docuuid = docdict['uuid']
     docext = docdict['metadata']['org_filename'].split('.')[-1]
     rawfname = ''.join([docuuid,
@@ -26,8 +31,8 @@ def prep_for_stash(docdict, project='project', prefix=''):
                         # docext,  # consider removing for good.
                         '.json',
                         ])
-    rawpointer = ''.join([prefix, '/', 'raw', '/', rawfname])
-    textpointer = ''.join([prefix, '/', 'text', '/', textname])
+    rawpointer = join(prefix, 'raw/', rawfname)
+    textpointer = join(prefix, 'text/', textname)
     textserializedcontent = dumps(docdict['parsed_doc']['content'],
                                   indent=4)
     rawcontent = docdict['parsed_doc']['rawbody']

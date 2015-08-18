@@ -15,6 +15,7 @@ from time import strftime
 from json import dumps
 
 from gentrify.parse import parse_multi_layer_file
+from gentrify.utils import flatten_array_like_strct_gen
 
 
 import logging
@@ -84,6 +85,18 @@ def registrar_nested(uri,
             except(KeyError):
                 metadata['children'] = dumps([], indent=4)
         parseddoc['content'].pop('rawbody', None)
+        if metadata[u'type'] == 'email':  # TODO (steven_c) this does not belong
+            # TODO (steven_c) move this out, shouldn't have doc specific
+            parsedcon = parseddoc['content']
+            metadata[u'extra'
+                     ] = {k:
+                          list(flatten_array_like_strct_gen(parsedcon.get(k,
+                                                                          [])))
+                          for k in ('from', 'to', 'cc', 'bcc')}
+            metadata[u'extra'].update({k: parsedcon.get(k, [])
+                                       for k in ('message-id', 'thread-index')})
+        else:
+            metadata[u'extra'] = dict()
         yield {u'uuid': docid,
                u'parsed_doc': parseddoc,
                u'metadata': metadata,

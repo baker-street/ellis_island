@@ -53,10 +53,13 @@ def default_create_table_sqlalchemy(uri, tablename='metatable'):
             date_added = Column(Date, nullable=False)
         if 'psql' in uri or 'postgresql' in uri:
             children = Column(JSON)
+            extra = Column(JSON)
         elif 'sqlite' in uri:
             children = Column(BLOB)
+            extra = Column(BLOB)
         else:
             children = Column(Text)
+            extra = Column(Text)
         raw_checksum = Column(Text)
         text_checksum = Column(Text)
 

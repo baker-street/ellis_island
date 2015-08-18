@@ -106,8 +106,8 @@ def main(inputdir,
                                                     project=project)
     # --
     # IO
-    outroottext = path.join(datafile, project, 'text/')
-    outrootraw = path.join(datafile, project, 'raw/')
+    outroottext = path.join(datafile, 'text/')
+    outrootraw = path.join(datafile, 'raw/')
     if ParseUri(datafile).scheme in {'file'}:
         outroottextobj = pathlib.Path(outroottext)
         if not outroottextobj.is_dir():

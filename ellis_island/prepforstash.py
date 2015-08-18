@@ -26,8 +26,8 @@ def prep_for_stash(docdict, project='project', prefix=''):
                         # docext,  # consider removing for good.
                         '.json',
                         ])
-    rawpointer = ''.join([prefix, project, '/', 'raw', '/', rawfname])
-    textpointer = ''.join([prefix, project, '/', 'text', '/', textname])
+    rawpointer = ''.join([prefix, '/', 'raw', '/', rawfname])
+    textpointer = ''.join([prefix, '/', 'text', '/', textname])
     textserializedcontent = dumps(docdict['parsed_doc']['content'],
                                   indent=4)
     rawcontent = docdict['parsed_doc']['rawbody']

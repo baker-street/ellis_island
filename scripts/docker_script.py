@@ -30,7 +30,7 @@ LOG = logging.getLogger(__name__)
 LOGFMT = '%(levelname)s\tproc:%(process)d thread:%(thread)d module:%(module)s\
 \t%(message)s'
 
-PROJECT = unicode(uuid4())
+PROJECT = unicode(uuid4()).split('-')[0]
 
 TESTHELP = '''If test mode,the meta table will end with the projects name.
 '''

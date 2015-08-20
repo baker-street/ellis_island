@@ -24,7 +24,7 @@ setup(
                  'Operating System :: GNU Linux',
                  'Development Status :: 3 - Alpha',
                  'Programming Language :: Python :: 2.7',
-                 'License :: MIT License',
+                 'License :: GNU GPL v3+',
                  ],
     keywords='nlp encoding text plaintext preprocessing',
     author='Steven Cutting',
@@ -40,8 +40,8 @@ setup(
                       'boto3',
                       ],
     scripts=['scripts/docker_script.py']
-)
-"""
+    )
+""" Cython Stuff
 from distutils.core import setup
 from Cython.Build import cythonize
 from distutils.extension import Extension

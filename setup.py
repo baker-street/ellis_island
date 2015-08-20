@@ -4,13 +4,9 @@ ellis_island  Copyright (C) 2015  Steven Cutting - License: ellis_island/LICENSE
 """
 from setuptools import setup, find_packages
 
-THE_LONG_DESCRIPTION = """
-Makes misc files usable for nlp, en masse.
-"""
+with open("README.md") as fp:
+    THE_LONG_DESCRIPTION = fp.read()
 
-PACKAGES = ['ellis_island',
-            'ellis_island.utils',
-            ]
 
 setup(
     name='ellis_island',
@@ -21,6 +17,7 @@ setup(
     classifiers=['Topic :: NLP',
                  'Topic :: Text cleaning',
                  'Intended Audience :: Developers',
+                 'Intended Audience :: Data Scientists',
                  'Operating System :: GNU Linux',
                  'Development Status :: 3 - Alpha',
                  'Programming Language :: Python :: 2.7',
@@ -29,7 +26,7 @@ setup(
     keywords='nlp encoding text plaintext preprocessing',
     author='Steven Cutting',
     author_email='steven.e.cutting@linux.com',
-    packages=PACKAGES,
+    packages=find_packages(exclude=('scripts', 'tests')),
     # zip_safe=False,
     install_requires=['pathlib',
                       'pyyaml',
@@ -39,6 +36,7 @@ setup(
                       'smart_open',  # TODO (steven_c) phase out smart_open
                       'boto3',
                       ],
+<<<<<<< HEAD
     scripts=['scripts/docker_script.py']
     )
 """ Cython Stuff
@@ -76,3 +74,7 @@ setup(name="ellis_island",
       ext_modules=cythonize(extensions),
       )
 """
+=======
+    scripts=['scripts/docker_script.py'],
+    )
+>>>>>>> master

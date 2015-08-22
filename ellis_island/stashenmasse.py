@@ -36,7 +36,10 @@ class EnMasseStash(object):
         self.metawriter.stash(datumdict['meta'])
         self.rawwriter.stash(datumdict['raw'])
         if datumdict['meta']['use']:
-            self.textwriter.stash(datumdict['text'])
+            try:
+                self.textwriter.stash(datumdict['text'])
+            except KeyError:
+                pass
 
     def close(self):
         self.metawriter.close()

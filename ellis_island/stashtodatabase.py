@@ -22,7 +22,7 @@ from sqlalchemy import(Column,
                        DateTime,
                        Date,
                        BLOB)
-from sqlalchemy.dialects.postgres import JSON
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.exc import NoSuchTableError
 
 from ellis_island.utils.misc import get_default_data_key

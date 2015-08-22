@@ -61,7 +61,11 @@ def stash_en_masse(dataiter, metauri, rawuri, texturi, metatable,
                       extraencrypt=extraencrypt, encryptkey=encryptkey,
                       **xargs) as stashobj:
         for i, datum in enumerate(dataiter):
-            LOG.info('\t'.join([str(i), datum['meta']['org_filename']]))
+            try:
+                ogfname = datum['meta']['org_filename']
+            except KeyError:
+                ogfname = datum['meta']['uuid']
+            LOG.info('\t'.join([str(i), ogfname]))
             stashobj.stash(datum)
             I = i
     LOG.info('\t'.join(['DocsIterd:', str(I)]))

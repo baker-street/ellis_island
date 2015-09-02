@@ -20,12 +20,22 @@ Functions to assist in parallel processing with Python 2.7.
 * Similar to joblib.Parallel but with the addition of imap functionality
   and a more effective way of handling Ctrl-C exit (we add a timeout).
 """
+import sys
 import itertools
 from multiprocessing import cpu_count, Pool, Process, Manager, Lock
 from multiprocessing.pool import IMapUnorderedIterator, IMapIterator
-import cPickle
-import sys
+try:
+    import cPickle
+except ImportError:
+    import pickle as cPickle
 
+if sys.version_info[0] < 3:
+    _STRINGTYPES = (basestring,)
+else:
+    # temp fix, so that 2.7 support wont break
+    unicode = str  # adjusting to python3
+    xrange = range
+    _STRINGTYPES = (str, bytes)
 
 ###############################################################################
 # Globals

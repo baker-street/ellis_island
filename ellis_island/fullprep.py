@@ -44,7 +44,7 @@ def custom_clean_and_register(uri, proclist, dontstop=False):
         return chain_procs(uri, newproclist)
     except:
         LOG.critical('\t'.join([uri,
-                                traceback.format_exc().encode('utf-8')
+                                str(traceback.format_exc())
                                 ]))
         if dontstop:
             return [None]
@@ -70,13 +70,17 @@ def clean_and_register(uri, dontstop=False,
 
 def clean_and_register_bulk(uriiter, prefix, dontstop=False,
                             project=getenv(PROJECTENV,
-                                           DEFAULTPROJECTID)):
+                                           DEFAULTPROJECTID),
+                            **kwargs):
     """
     Provides the output of the files and any child files as one stream.
     Yields dicts.
     """
     for uri in uriiter:
-        for res in clean_and_register(uri, prefix, dontstop, project):
+        for res in clean_and_register(uri=uri,
+                                      prefix=prefix,
+                                      dontstop=dontstop,
+                                      project=project):
             yield res
 
 

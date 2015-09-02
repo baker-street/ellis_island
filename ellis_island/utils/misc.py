@@ -9,10 +9,15 @@ __license__ = "GPL3"
 __maintainer__ = "Steven Cutting"
 __email__ = 'steven.c.projects@gmail.com'
 
+import logging
+LOG = logging.getLogger(__name__)
+
 import os
 from os import environ
-
-from cryptography.fernet import Fernet
+try:
+    from cryptography.fernet import Fernet
+except ImportError:
+    LOG.warn('cryptography no installed.')
 
 
 def spelunker_gen(rootdir):
@@ -26,7 +31,6 @@ def pass_through(stuff):
 
 
 def encrypt_it(content, key):
-    print key
     ferob = Fernet(str(key))
     return ferob.encrypt(str(content))
 

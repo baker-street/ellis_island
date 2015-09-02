@@ -9,6 +9,10 @@ __license__ = "GPL3"
 __maintainer__ = "Steven Cutting"
 __email__ = 'steven.c.projects@gmail.com'
 
+import logging
+LOG = logging.getLogger(__name__)
+
+import sys
 from uuid import uuid4
 from collections import Iterable
 from time import strftime
@@ -17,9 +21,13 @@ from json import dumps
 from gentrify.parse import parse_multi_layer_file
 from gentrify.utils import flatten_array_like_strct_gen
 
-
-import logging
-LOG = logging.getLogger(__name__)
+if sys.version_info[0] < 3:
+    _STRINGTYPES = (basestring,)
+else:
+    # temp fix, so that 2.7 support wont break
+    unicode = str  # adjusting to python3
+    xrange = range
+    _STRINGTYPES = (str, bytes)
 
 
 def gen_uuid_list(n, uuid_func=uuid4):

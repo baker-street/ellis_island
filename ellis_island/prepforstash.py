@@ -49,11 +49,13 @@ def prep_for_stash(docdict, project='project', prefix=''):
     newmetadata = docdict['metadata'].copy()
     newmetadata.update({'raw_pointer': rawpointer,
                         'text_pointer': textpointer,
-                        # 'text_checksum': md5(byte_it(textserializedcntnt)
-                        #                      ).hexdigest(),
-                        # 'raw_checksum': md5(byte_it(rawcontent)  # consider rm
-                        #                     ).hexdigest(),
                         })
+    if sys.version_info[0] < 3:
+        textbodyhash = md5(docdict['parsed_doc']['content']['body']).hexdigest()
+        rawhash = md5(rawcontent).hexdigest()
+        newmetadata.update({'text_checksum': textbodyhash,
+                            'raw_checksum': rawhash,
+                            })
     return {'uuid': docuuid,
             'raw': {'pointer': rawpointer,
                     'content': rawcontent,

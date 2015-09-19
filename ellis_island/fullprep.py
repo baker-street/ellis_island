@@ -112,6 +112,8 @@ def clean_and_register_en_masse(uriiter, prefix, dontstop=False,
         for i, res in enumerate(reslist):
             try:
                 LOG.info(str(i) + '\t' + res['meta']['org_filename'])
+                if not res['meta']['use']:
+                    res.pop('text')
                 yield res
             except(TypeError):
                 continue

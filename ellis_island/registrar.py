@@ -18,8 +18,8 @@ from collections import Iterable
 from time import strftime
 from json import dumps
 
-from gentrify.parse import parse_multi_layer_file
-from gentrify.utils import flatten_array_like_strct_gen
+from estratto.parse import parse_multi_layer_file
+from estratto.utils import flatten_array_like_strct_gen
 
 if sys.version_info[0] < 3:
     _STRINGTYPES = (basestring,)

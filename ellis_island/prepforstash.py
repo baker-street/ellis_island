@@ -18,7 +18,8 @@ from json import dumps
 from hashlib import md5
 from functools import partial
 
-from gentrify.fixEncoding import make_byte
+from estratto.fixEncoding import make_byte
+
 from ellis_island.utils.misc import pass_through
 
 if sys.version_info[0] < 3:

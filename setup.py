@@ -36,5 +36,5 @@ setup(
                       'smart_open',  # TODO (steven_c) phase out smart_open
                       'boto3',
                       ],
-    scripts=['scripts/docker_script.py', 'scripts/ellisrun.py']
+    scripts=['scripts/docker_script.py', 'scripts/ellisrun']
     )

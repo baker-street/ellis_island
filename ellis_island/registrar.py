@@ -61,7 +61,7 @@ def registrar_nested(uri,
                         # supplied by the parsing func, vs uri.
                         u'org_filename': parseddoc[u'filename'],
                         u'use': bool(parseddoc[u'content'][u'body']),
-                        u'uuid': docid,
+                        u'id': docid,
                         u'parent': parentuuid,
                         u'generation': generation,
                         u'date_added': dateadded
@@ -105,7 +105,7 @@ def registrar_nested(uri,
                                        for k in ('message-id', 'thread-index')})
         else:
             metadata[u'extra'] = dict()
-        yield {u'uuid': docid,
+        yield {u'id': docid,
                u'parsed_doc': parseddoc,
                u'metadata': metadata,
                }

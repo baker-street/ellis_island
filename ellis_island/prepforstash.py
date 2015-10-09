@@ -31,7 +31,7 @@ else:
 # TODO (steven_c) Consider moving encryption option here
 def prep_for_stash(docdict, project='project', prefix=''):
     # LOG.debug('doc prefix:\t' + prefix)  # Not really needed. Consider rm.
-    docuuid = docdict['uuid']
+    docuuid = docdict['id']
     docext = docdict['metadata']['org_filename'].split('.')[-1]
     rawfname = ''.join([docuuid,
                         u'.',
@@ -57,7 +57,7 @@ def prep_for_stash(docdict, project='project', prefix=''):
         newmetadata.update({'text_checksum': textbodyhash,
                             'raw_checksum': rawhash,
                             })
-    return {'uuid': docuuid,
+    return {'id': docuuid,
             'raw': {'pointer': rawpointer,
                     'content': rawcontent,
                     },

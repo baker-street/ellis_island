@@ -30,7 +30,7 @@ def default_create_table_sqlalchemy(uri, tablename='metatable'):
     class MetaData(Base):
         __tablename__ = tablename
 
-        uuid = Column(String(length=36), primary_key=True)
+        id = Column(String(length=36), primary_key=True)
         type = Column(Text, nullable=False)
         mime = Column(Text)
         info = Column(Text)

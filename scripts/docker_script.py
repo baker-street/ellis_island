@@ -178,8 +178,8 @@ def main(inputdir,
                           'vcores': ioc,
                           'batch': iob,
                           })
-    # sdbase.default_create_table_sqlalchemy(meta, tablename=metatable)
-    stashobjdict = {  # 'meta': SQLStash(uri=meta, table=metatable),
+    sdbase.default_create_table_sqlalchemy(meta, tablename=metatable)
+    stashobjdict = {'meta': SQLStash(uri=meta, table=metatable),
                     'text': file_stash(parenturi=outroottext,
                                        **iogenargs),
                     'raw': file_stash(parenturi=outrootraw,

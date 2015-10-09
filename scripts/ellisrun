@@ -23,7 +23,7 @@ from ellis_island.utils.smartopen import prefix_path_from_uri, ParseUri
 
 
 from superserial import SQLStash, file_stash, Gula
-from superserial.stashtofile import S3FileStashPool
+# from superserial.stashtofile import S3FileStashPool
 
 # Imports for script portion.
 import click

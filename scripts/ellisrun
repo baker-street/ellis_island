@@ -47,7 +47,7 @@ TESTHELP = '''If test mode,the meta table will end with the projects name.
 @click.option('--meta',
               default='sqlite:////mnt/output/metadata.db',
               help='Where to store the captured metadata. A uri.')
-@click.option('--datafile', default='/mnt/output/textdata/',
+@click.option('--datafile', default='/mnt/output/document/',
               help='Where to store the out put data files. A uri.')
 @click.option('-n', default=0, type=int,
               help='Number of files to use. If 0, it will use all found files.')
@@ -57,7 +57,7 @@ TESTHELP = '''If test mode,the meta table will end with the projects name.
               help='The number of parallel processes. If 1, will run linear.')
 @click.option('--project', default=PROJECT,
               help='The project id to use.')
-@click.option('--metatable', default='metadata',
+@click.option('--metatable', default='document',
               help='The table to store the metadata in.')
 @click.option('--test/--no-test', default=False,
               help=TESTHELP)
@@ -185,15 +185,17 @@ def main(inputdir,
                     'raw': file_stash(parenturi=outrootraw,
                                       **iogenargs),
                     }
-    chomp = Gula(**stashobjdict)
 
-    def rm_meta(rpackiter):
+    def rm_key(rpackiter, key):
         for pack in rpackiter:
-            pack.pop('meta')
+            pack.pop(key)
             yield pack
 
-    rpckitr = rm_meta(respackiter)
-    chomp.consume(rpckitr)
+    rpckitr = rm_key(respackiter, key='id')
+
+    with Gula(**stashobjdict) as chomp:
+        chomp.consume(rpckitr)
+
     LOG.info('\t'.join(['VCores:',
                         str(vcores),
                         ]))

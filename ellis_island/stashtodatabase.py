@@ -23,7 +23,7 @@ from sqlalchemy import(Column,
 from sqlalchemy.dialects.postgresql import JSON
 
 
-def default_create_table_sqlalchemy(uri, tablename='metatable'):
+def default_create_table_sqlalchemy(uri, tablename='document'):
     engine = create_engine(uri, convert_unicode=True, encoding='utf-8')
     Base = declarative_base()
 

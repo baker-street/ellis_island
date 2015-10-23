@@ -20,7 +20,7 @@ from sqlalchemy import(Column,
                        DateTime,
                        Date,
                        BLOB)
-from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy.dialects.postgresql import JSONB
 
 
 def default_create_table_sqlalchemy(uri, tablename='document'):
@@ -47,8 +47,8 @@ def default_create_table_sqlalchemy(uri, tablename='document'):
             datetime = Column(DateTime)
             date_added = Column(Date, nullable=False)
         if 'psql' in uri or 'postgresql' in uri:
-            children = Column(JSON)
-            extra = Column(JSON)
+            children = Column(JSONB)
+            extra = Column(JSONB)
         elif 'sqlite' in uri:
             children = Column(BLOB)
             extra = Column(BLOB)

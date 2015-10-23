@@ -44,8 +44,7 @@ def prep_for_stash(docdict, project='project', prefix=''):
                         ])
     rawpointer = join(prefix, 'raw/', rawfname)
     textpointer = join(prefix, 'text/', textname)
-    textserializedcntnt = dumps(docdict['parsed_doc']['content'],
-                                indent=4)
+    textserializedcntnt = dumps(docdict['parsed_doc']['content'])
     rawcontent = docdict['parsed_doc']['rawbody']  # .encode('utf-8')
     newmetadata = docdict['metadata'].copy()
     newmetadata.update({'raw_pointer': rawpointer,

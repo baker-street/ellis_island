@@ -1,0 +1,37 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+__title__ = 'superserial'
+__author__ = 'Steven Cutting'
+__author_email__ = 'steven.e.cutting@linux.com'
+__created_on__ = '11/26/2015'
+
+from shutil import copy2
+import os
+from os import path
+import click
+
+from superserial.utils import spelunker_gen, check_n_prep_path
+from estratto.fixEncoding import auto_eng_unicode_dang_it
+
+import logging
+LOG = logging.getLogger(__name__)
+LOGFMT = '%(levelname)s\tproc:%(process)d thread:%(thread)d module:%(module)s\
+\t%(message)s'
+
+
+@click.command()
+@click.argument('inputdir')
+@click.argument('outputdir')
+def main(inputdir,
+         outputdir):
+    for inpath, subdirlist, filelist in os.walk(inputdir):
+        newpath = auto_eng_unicode_dang_it(inpath.replace(inputdir,
+                                                          outputdir)).encode('ascii')
+        for fname in filelist:
+            newfpath = path.join(newpath, auto_eng_unicode_dang_it(fname).encode('ascii'))
+            check_n_prep_path(path.split(newpath)[0])
+            copy2(path.join(inpath, fname), newfpath)
+
+
+if __name__ == '__main__':
+    main()

@@ -19,13 +19,17 @@ try:
 except ImportError:
     LOG.warn('cryptography no installed.')
 
+from superserial.utils import spelunker_gen
+
 from estratto.fixEncoding import auto_eng_unicode_dang_it
 
 
+"""
 def spelunker_gen(rootdir):
     for dirname, subdirlist, filelist in os.walk(rootdir):
         for fname in filelist:
             yield '{}/{}'.format(auto_eng_unicode_dang_it(dirname), auto_eng_unicode_dang_it(fname))
+"""
 
 
 def pass_through(stuff):
